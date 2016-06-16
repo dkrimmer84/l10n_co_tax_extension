@@ -23,7 +23,7 @@ Colombia Impuestos:
     "account",
     ],
     'data': [
-
+	'views/l10n_co_tax_extension.xml',
     ],
     'installable': True,
 }

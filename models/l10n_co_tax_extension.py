@@ -26,3 +26,4 @@ class ColombianTaxes(models.Model):
     """ Model to create and manipulate personal taxes"""
     _description=  "Model to create own taxes"
     _name= "tax.own"
+    rfuente = fields.Char('Retencion en la fuente')
