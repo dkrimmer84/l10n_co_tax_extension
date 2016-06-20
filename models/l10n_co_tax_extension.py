@@ -25,5 +25,8 @@ class ColombianTaxes(models.Model):
 
     """ Model to create and manipulate personal taxes"""
     _description=  "Model to create own taxes"
-    _name= "tax.own"
-    rfuente = fields.Char('Retencion en la fuente')
+    _name = 'account.invoice'
+    _inherit = 'account.invoice'
+
+# This is a colombian tax named Retenciòn en la fuente
+    rfuente = fields.Float('Retencion en la fuente')
