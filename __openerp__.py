@@ -2,7 +2,7 @@
 
 
 {
-    'name': 'Colombia - Impuestos',
+    'name': 'Colombia - Impuestos2',
     'category': 'Localization',
     'version': '0.1 Beta',
     'author': 'Jorge Torres V., Dominic Krimmer, Plastinorte S.A.S',

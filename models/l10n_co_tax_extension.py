@@ -28,5 +28,20 @@ class ColombianTaxes(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
-# This is a colombian tax named Retenciòn en la fuente
+
+    # This is a colombian tax named Retenciòn en la fuente
     rfuente = fields.Float('Retencion en la fuente')
+    varp = fields.Float(string='variable de prueba')
+    resul= fields.Integer(string='resultado',store=True, compute="_resul_pc")
+
+    @api.one
+    @api.depends('resul')
+    def _resul_pc(self):
+        self.resul =  100
+
+    #@api.one
+    #@api.onchange('resul')
+    #def _onchange_field(self):
+        #if self.resul:
+            #resultado ="10"
+        #self.resul= resultado
