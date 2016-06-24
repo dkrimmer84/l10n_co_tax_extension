@@ -19,7 +19,6 @@
 
 # Extended Partner Module
 from openerp import models, fields, api, exceptions
-import re
 
 class ColombianTaxes(models.Model):
 
@@ -28,20 +27,9 @@ class ColombianTaxes(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
+    myresult = fields.Char('Retencion:')
 
-    # This is a colombian tax named Retenciòn en la fuente
-    rfuente = fields.Float('Retencion en la fuente')
-    varp = fields.Float(string='variable de prueba')
-    resul= fields.Integer(string='resultado',store=True, compute="_resul_pc")
-
-    @api.one
-    @api.depends('resul')
-    def _resul_pc(self):
-        self.resul =  100
-
-    #@api.one
-    #@api.onchange('resul')
-    #def _onchange_field(self):
-        #if self.resul:
-            #resultado ="10"
-        #self.resul= resultado
+    @api.onchange('amount_untaxed')
+    def test(self):
+        if self.amount_untaxed > 0:
+            self.myresult = self.amount_untaxed + 5
