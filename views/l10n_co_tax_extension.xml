@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<openerp>
+<data>
+  
+        <!-- Extending Partner Form View -->
+
+        <record id="invoice_form" model="ir.ui.view">
+            
+          <field name="inherit_id" ref="account.invoice_form"/>
+          <field name="model">account.invoice</field>
+            <field name="arch" type="xml">
+            
+
+ <!-- Adding Retencion en la fuente tax to the account.invoice_form-->
+
+                <field name="amount_untaxed" position="after">
+                    <field name="myresult" class="ColombianTaxes2" />
+                </field>
+
+</field>
+</record>
+</data>
+</openerp>

@@ -19,10 +19,17 @@
 
 # Extended Partner Module
 from openerp import models, fields, api, exceptions
-import re
 
 class ColombianTaxes(models.Model):
 
     """ Model to create and manipulate personal taxes"""
     _description=  "Model to create own taxes"
-    _name= "tax.own"
+    _name = 'account.invoice'
+    _inherit = 'account.invoice'
+
+    myresult = fields.Char('Retencion:')
+
+    @api.onchange('amount_untaxed')
+    def test(self):
+        if self.amount_untaxed > 0:
+            self.myresult = self.amount_untaxed + 5
