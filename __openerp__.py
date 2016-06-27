@@ -2,7 +2,7 @@
 
 
 {
-    'name': 'Colombia - Impuestos2',
+    'name': 'Colombia - Impuestos',
     'category': 'Localization',
     'version': '0.1 Beta',
     'author': 'Jorge Torres V., Dominic Krimmer, Plastinorte S.A.S',
@@ -16,6 +16,8 @@ Colombia Impuestos:
 ======================
 
     * Is a module to calculate Colombian taxes.
+    * Retenciòn en la fuente is calculated by 2.5% from untaxed amount and added to total amount.
+
 
 
     """,
