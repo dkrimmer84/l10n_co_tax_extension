@@ -27,9 +27,13 @@ class ColombianTaxes(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
-    myresult = fields.Char('Retencion:')
+# Define rfuente as new tax.
 
-    @api.onchange('amount_untaxed')
+    rfuente = fields.Monetary('Retencion en la fuente:', readonly="True")
+
+# Calculate rfuente and total amount
+
+    @api.onchange('amount_untaxed', 'amount_total')
     def test(self):
-        if self.amount_untaxed > 0:
-            self.myresult = self.amount_untaxed + 5
+        self.rfuente = self.amount_untaxed * 0.025
+        self.amount_total = self.amount_total + self.rfuente

@@ -14,7 +14,7 @@
  <!-- Adding Retencion en la fuente tax to the account.invoice_form-->
 
                 <field name="amount_untaxed" position="after">
-                    <field name="myresult" class="ColombianTaxes2" />
+                    <field name="rfuente" class="ColombianTaxes" />
                 </field>
 
 </field>
