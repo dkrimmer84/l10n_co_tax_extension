@@ -17,55 +17,53 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
 ###############################################################################
 
-from openerp import api, fields, models, _
-from openerp.tools import float_is_zero, float_compare
-from openerp.tools.misc import formatLang
-
-from openerp.exceptions import UserError, RedirectWarning, ValidationError
-
-import openerp.addons.decimal_precision as dp
-
-
-
+from openerp import api, fields, models
 
 
 class ColombianTaxes(models.Model):
+    """ This Model calculates and saves withholding tax that apply in
+    Colombia"""
 
-    """ Model to create and manipulate personal taxes"""
-    _description=  "Model to create own taxes"
+    _description = 'Model to create and save withholding taxes'
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
-# Define rfuente as new tax.
+    # Define withholding as new tax.
+    wh_taxes = fields.Monetary('Withholding Tax:', store="True",
+                               compute="_compute_amount")
 
-    rfuente = fields.Monetary('Retencion en la fuente:',store="True" , compute = "_compute_amount")
-
-# Calculate rfuente and total amount
-
-
-    @api.one
-    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
+    # Calculate withholding tax and total amount
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount',
+                 'currency_id', 'company_id')
     def _compute_amount(self):
-        self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line_ids)
-        self.rfuente = self.amount_untaxed * (-0.025)
+        """
+        This functions computes the withholding tax on the untaxed amount
+        @return: void
+        """
+        self.amount_untaxed = sum(line.price_subtotal for line in
+                                  self.invoice_line_ids)
+
+        # TODO: 0.025 is a static value right now. This will be dynamic
+        # calculate colombian withholding tax
+        self.wh_taxes = self.amount_untaxed * 0.025
+        # Calculate the sum of all taxes
         self.amount_tax = sum(line.amount for line in self.tax_line_ids)
+        # Calculate the sum of total amount with all taxes
         self.amount_total = self.amount_untaxed + self.amount_tax
         amount_total_company_signed = self.amount_total
         amount_untaxed_signed = self.amount_untaxed
-        if self.currency_id and self.currency_id != self.company_id.currency_id:
-            amount_total_company_signed = self.currency_id.compute(self.amount_total, self.company_id.currency_id)
-            amount_untaxed_signed = self.currency_id.compute(self.amount_untaxed, self.company_id.currency_id)
+
+        if self.currency_id \
+                and self.currency_id != self.company_id.currency_id:
+            amount_total_company_signed = \
+                self.currency_id.compute(self.amount_total,
+                                         self.company_id.currency_id)
+            amount_untaxed_signed = self.currency_id.compute(
+                self.amount_untaxed, self.company_id.currency_id
+            )
+
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_company_signed = amount_total_company_signed * sign
         self.amount_total_signed = self.amount_total * sign
         self.amount_untaxed_signed = amount_untaxed_signed * sign
-        self.amount_total = self.amount_total + self.rfuente
-
-
-
-
-
-
-
-
-
+        self.amount_total -= self.wh_taxes

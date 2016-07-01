@@ -1,31 +1,26 @@
 # -*- coding: utf-8 -*-
-
-
 {
     'name': 'Colombia - Impuestos',
     'category': 'Localization',
-    'version': '0.1 Beta',
+    'version': '0.1',
     'author': 'Jorge Torres V., Dominic Krimmer, Plastinorte S.A.S',
     'license': 'AGPL-3',
     'maintainer': 'dominic.krimmer@gmail.com',
     'website': 'https://www.plastinorte.com',
-    'summary': 'Colombia Impuestos: Extended Partner / Contact Module - Odoo 9.0',
+    'summary': 'Colombian Taxes: Invoice Module - Odoo 9.0',
     'images': ['images/'],
     'description': """
 Colombia Impuestos:
 ======================
-
-    * Is a module to calculate Colombian taxes.
-    * Retenciòn en la fuente is calculated by 2.5% from untaxed amount and added to total amount.
-
-
-
+    * This module calculates some Colombian taxes that have to apply
+    * First tax: withholding tax, which is calculated by 2,4% from the untaxed amount and calculated with the total amount
     """,
     'depends': [
-    "account",
+        'account',
+        'sale'
     ],
     'data': [
-'views/l10n_co_tax_extension.xml',
+        'views/l10n_co_tax_extension.xml',
     ],
     'installable': True,
 }
