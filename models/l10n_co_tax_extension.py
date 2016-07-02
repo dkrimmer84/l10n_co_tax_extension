@@ -48,3 +48,11 @@ class ColombianTaxes(models.Model):
         self.wh_taxes = self.amount_untaxed * self.TWH
         self.amount_total -= self.wh_taxes
 
+        #Calling the original calculation did not call the local var sign.
+        sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
+
+        # Because python is interpreted it need to recalculate
+        # amount_total_signed again.
+        self.amount_total_signed = self.amount_total * sign
+
+
