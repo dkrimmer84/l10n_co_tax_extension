@@ -18,7 +18,6 @@
 ###############################################################################
 
 from openerp import api, fields, models
-from openerp.tools import float_is_zero, float_compare
 
 
 class ColombianTaxes(models.Model):
@@ -56,9 +55,6 @@ class ColombianTaxes(models.Model):
         # amount_total_signed again.
         self.amount_total_signed = self.amount_total * sign
 
-
-
-    # Calling the original calculation from residual
 
 
     def _compute_residual(self):
