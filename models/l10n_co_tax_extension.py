@@ -28,6 +28,8 @@ class ColombianTaxes(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
+    TWH = 0.025
+
     # Define withholding as new tax.
     wh_taxes = fields.Monetary('Withholding Tax:', store="True",
                                compute="_compute_amount")
@@ -43,9 +45,9 @@ class ColombianTaxes(models.Model):
         self.amount_untaxed = sum(line.price_subtotal for line in
                                   self.invoice_line_ids)
 
-        # TODO: 0.025 is a static value right now. This will be dynamic
+        # TODO: 0.025 (TWH)is a static value right now. This will be dynamic
         # calculate colombian withholding tax
-        self.wh_taxes = self.amount_untaxed * 0.025
+        self.wh_taxes = self.amount_untaxed * self.TWH
         # Calculate the sum of all taxes
         self.amount_tax = sum(line.amount for line in self.tax_line_ids)
         # Calculate the sum of total amount with all taxes
