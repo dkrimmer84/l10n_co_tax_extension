@@ -19,6 +19,9 @@
 
 from openerp import api, fields, models
 
+import pprint
+import logging
+_logger = logging.getLogger(__name__)
 
 class ColombianTaxes(models.Model):
     """ This Model calculates and saves withholding tax that apply in
@@ -67,3 +70,34 @@ class ColombianTaxes(models.Model):
         self.residual_signed -= self.wh_taxes
         self.residual -= self.wh_taxes
 
+    @api.multi
+    def finalize_invoice_move_lines(self, move_lines):
+        part = self.env['res.partner']._find_accounting_partner(self.partner_id)
+        account = self.env['account.account'].search([('code', '=', '135515')])
+
+        for tp_line in move_lines:
+            line = tp_line[2]
+            if line['name'] == '/':
+                line['debit'] = line['debit'] - self.wh_taxes
+                wh_line = (0, 0,
+                             {
+                                 'date_maturity': False,
+                                 'partner_id': part.id,
+                                 'name': 'Retención a la fuente',
+                                 'debit': self.wh_taxes,
+                                 'credit': False,
+                                 'account_id': account.id,
+                                 'analytic_line_ids': False,
+                                 'amount_currency': 0,
+                                 'currency_id': False,
+                                 'quantity': 1,
+                                 'product_id': False,
+                                 'product_uom_id': False,
+                                 'analytic_account_id': False,
+                                 'invoice_id': self.id,
+                                 'tax_ids': False,
+                                 'tax_line_id': False,
+                             })
+
+        move_lines.insert(-1, wh_line)
+        return move_lines
