@@ -60,15 +60,15 @@ class ColombianTaxes(models.Model):
 
 
 
-    def _compute_residual(self):
+    #def _compute_residual2(self):
 
     # Calling the original calculation from residual
-        super(ColombianTaxes, self)._compute_residual()
+        #super(ColombianTaxes, self)._compute_residual()
 
     #recalculating each var from residual.
-        self.residual_company_signed -= self.wh_taxes
-        self.residual_signed -= self.wh_taxes
-        self.residual -= self.wh_taxes
+        # self.residual_company_signed -= self.wh_taxes
+        # self.residual_signed -= self.wh_taxes
+        # self.residual -= self.wh_taxes
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
