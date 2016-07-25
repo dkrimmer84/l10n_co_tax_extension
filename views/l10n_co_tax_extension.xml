@@ -6,10 +6,13 @@
               <field name="inherit_id" ref="account.invoice_form"/>
               <field name="model">account.invoice</field>
                 <field name="arch" type="xml">
-                    <!--  Withholding calculation -->
-                    <field name="amount_untaxed" position="after">
-                        <field name="wh_taxes" class="ColombianTaxes" />
-                    </field>
+                  <!--  Withholding calculation -->
+                  <field name="amount_tax" position="after">
+                    <field name="amount_without_wh_tax" style="border-top: 1px solid #cacaca;"/>
+                  </field>
+                  <field name="amount_total" position="before">
+                    <field name="wh_taxes" class="ColombianTaxes" />
+                  </field>
                 </field>
             </record>
     </data>

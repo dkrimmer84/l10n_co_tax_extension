@@ -34,8 +34,11 @@ class ColombianTaxes(models.Model):
     TWH = 0.025
 
     # Define withholding as new tax.
-    wh_taxes = fields.Monetary('Withholding Tax:', store="True",
+    wh_taxes = fields.Monetary('Withholding Tax', store="True",
                                compute="_compute_amount")
+
+    amount_without_wh_tax = fields.Monetary('Total With Tax', store="True",
+                                            compute="_compute_amount")
 
     # Calculate withholding tax and (new) total amount
     def _compute_amount(self):
@@ -46,6 +49,7 @@ class ColombianTaxes(models.Model):
         # Calling the original calculation
         super(ColombianTaxes, self)._compute_amount()
 
+        self.amount_without_wh_tax = self.amount_total
         # Extending the calculation with the colombian withholding tax
         # TODO: 0.025 is a static value right now. This will be dynamic
         self.wh_taxes = self.amount_untaxed * self.TWH
@@ -57,18 +61,6 @@ class ColombianTaxes(models.Model):
         # Because python is interpreted it need to recalculate
         # amount_total_signed again.
         self.amount_total_signed = self.amount_total * sign
-
-
-
-    #def _compute_residual2(self):
-
-    # Calling the original calculation from residual
-        #super(ColombianTaxes, self)._compute_residual()
-
-    #recalculating each var from residual.
-        # self.residual_company_signed -= self.wh_taxes
-        # self.residual_signed -= self.wh_taxes
-        # self.residual -= self.wh_taxes
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
