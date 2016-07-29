@@ -15,5 +15,32 @@
                   </field>
                 </field>
             </record>
+
+            <record id="view_tax_form" model="ir.ui.view">
+              <field name="inherit_id" ref="account.view_tax_form"/>
+              <field name="model">account.tax</field>
+              <field name="arch" type="xml">
+                <field name="type_tax_use" position="after">
+                  <field name="tax_in_invoice" />
+                </field>
+              </field>
+            </record>
+
+            <record id="product_template_form_view" model="ir.ui.view">
+              <field name="name">product.template.form.inherit.l10n_co</field>
+              <field name="model">product.template</field>
+              <field name="priority">5</field>
+              <field name="inherit_id" ref="product.product_template_form_view"/>
+              <field name="arch" type="xml">
+                <field name="taxes_id" widget="many2many_tags" position="replace">
+                  <field name="taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                                                                          ('type_tax_use', '=', 'sale')]" />
+                </field>
+                <field name="supplier_taxes_id" widget="many2many_tags" position="replace">
+                  <field name="supplier_taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                                                                                   ('type_tax_use', '=', 'purchase')]" />
+                </field>
+              </field>
+            </record> 
     </data>
 </openerp>

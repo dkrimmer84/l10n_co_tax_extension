@@ -2,6 +2,7 @@
 ###############################################################################
 #                                                                             #
 # Copyright (C) 2016  Dominic Krimmer                                         #
+#                     Luis Alfredo da Silva (luis.adasilvaf@gmail.com)        #
 #                                                                             #
 # This program is free software: you can redistribute it and/or modify        #
 # it under the terms of the GNU Affero General Public License as published by #
@@ -93,3 +94,11 @@ class ColombianTaxes(models.Model):
 
         move_lines.insert(-1, wh_line)
         return move_lines
+
+class AccountTax(models.Model):
+    _name = 'account.tax'
+    _inherit = 'account.tax'
+    
+    tax_in_invoice = fields.Boolean(string="Evaluate in invoice", default=False,
+                                    help="Check this if you want to hide the tax from the taxes list in products") 
+
