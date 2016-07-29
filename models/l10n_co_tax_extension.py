@@ -100,5 +100,10 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
     
     tax_in_invoice = fields.Boolean(string="Evaluate in invoice", default=False,
-                                    help="Check this if you want to hide the tax from the taxes list in products") 
-
+        help="Check this if you want to hide the tax from the taxes list in products") 
+    dont_impact_balance = fields.Boolean(string="Don't impact balance", default=False,
+        help="Check this if you want to assign counterpart taxes accounts")
+    account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart', ondelete='restrict',
+        help="Account that will be set on invoice tax lines for invoices. Leave empty to use the expense account.")
+    refund_account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart on Refunds', ondelete='restrict',                                         
+        help="Account that will be set on invoice tax lines for refunds. Leave empty to use the expense account.")
