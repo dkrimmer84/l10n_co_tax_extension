@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[@t-if='o.tax_line_ids']/div/table/tbody" position="replace">
+            <tbody>
+                <tr t-foreach="o.tax_line_ids" t-as="t">
+                    <t t-if="not t.tax_id.tax_group_id.not_in_invoice">
+                        <td><span t-field="t.name"/></td>
+                        <td class="text-right">
+                            <span t-field="t.amount"
+                                t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                        </td>
+                    </t>
+                </tr>
+            </tbody>
+        </xpath>
+    </template>
+
+</data>
+</openerp>

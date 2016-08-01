@@ -95,6 +95,17 @@ class ColombianTaxes(models.Model):
         move_lines.insert(-1, wh_line)
         return move_lines
 
+    def _get_tax_amount_by_group(self):
+        res = super(ColombianTaxes, self)._get_tax_amount_by_group()
+        groups_not_in_invoice = self.env['account.tax.group'].search([('not_in_invoice','=',True)])
+
+        for g in groups_not_in_invoice:
+            for i in res:
+                if g.name == i[0]:
+                    res.remove(i) 
+        
+        return res
+
 class AccountTax(models.Model):
     _name = 'account.tax'
     _inherit = 'account.tax'
@@ -107,3 +118,10 @@ class AccountTax(models.Model):
         help="Account that will be set on invoice tax lines for invoices. Leave empty to use the expense account.")
     refund_account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart on Refunds', ondelete='restrict',                                         
         help="Account that will be set on invoice tax lines for refunds. Leave empty to use the expense account.")
+
+class AccountTaxGroup(models.Model):
+    _name = 'account.tax.group'
+    _inherit = 'account.tax.group'
+
+    not_in_invoice = fields.Boolean(string="Don't show in invoice", default=False,
+        help="Check this if you want to hide the taxes in this group when print an invoice") 
