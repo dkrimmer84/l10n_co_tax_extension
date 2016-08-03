@@ -17,10 +17,12 @@ Colombia Impuestos:
     """,
     'depends': [
         'account',
-        'sale'
+        'sale',
+        'l10n_co'
     ],
     'data': [
         'views/l10n_co_tax_extension.xml',
+        'views/report_invoice.xml'
     ],
     'installable': True,
 }

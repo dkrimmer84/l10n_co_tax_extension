@@ -2,6 +2,7 @@
 ###############################################################################
 #                                                                             #
 # Copyright (C) 2016  Dominic Krimmer                                         #
+#                     Luis Alfredo da Silva (luis.adasilvaf@gmail.com)        #
 #                                                                             #
 # This program is free software: you can redistribute it and/or modify        #
 # it under the terms of the GNU Affero General Public License as published by #
@@ -64,17 +65,16 @@ class ColombianTaxes(models.Model):
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
-        part = self.env['res.partner']._find_accounting_partner(self.partner_id)
         account = self.env['account.account'].search([('code', '=', '135515')])
 
         for tp_line in move_lines:
             line = tp_line[2]
-            if line['name'] == '/':
+            if line['account_id'] == self.account_id.id:
                 line['debit'] = line['debit'] - self.wh_taxes
                 wh_line = (0, 0,
                              {
                                  'date_maturity': False,
-                                 'partner_id': part.id,
+                                 'partner_id': self.partner_id.id,
                                  'name': 'Retención a la fuente',
                                  'debit': self.wh_taxes,
                                  'credit': False,
@@ -89,7 +89,37 @@ class ColombianTaxes(models.Model):
                                  'invoice_id': self.id,
                                  'tax_ids': False,
                                  'tax_line_id': False,
-                             })
-
+                             })        
+        
         move_lines.insert(-1, wh_line)
         return move_lines
+
+    def at_least_one_tax_group_enabled(self):
+        res = False
+        groups_not_in_invoice = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True)])]
+
+        for line in self.tax_line_ids:
+            if line.tax_id.tax_group_id.id in groups_not_in_invoice:
+                res = True
+
+        return res 
+
+class AccountTax(models.Model):
+    _name = 'account.tax'
+    _inherit = 'account.tax'
+    
+    tax_in_invoice = fields.Boolean(string="Evaluate in invoice", default=False,
+        help="Check this if you want to hide the tax from the taxes list in products") 
+    dont_impact_balance = fields.Boolean(string="Don't impact balance", default=False,
+        help="Check this if you want to assign counterpart taxes accounts")
+    account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart', ondelete='restrict',
+        help="Account that will be set on invoice tax lines for invoices. Leave empty to use the expense account.")
+    refund_account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart on Refunds', ondelete='restrict',                                         
+        help="Account that will be set on invoice tax lines for refunds. Leave empty to use the expense account.")
+
+class AccountTaxGroup(models.Model):
+    _name = 'account.tax.group'
+    _inherit = 'account.tax.group'
+
+    not_in_invoice = fields.Boolean(string="Don't show in invoice", default=False,
+        help="Check this if you want to hide the taxes in this group when print an invoice") 
