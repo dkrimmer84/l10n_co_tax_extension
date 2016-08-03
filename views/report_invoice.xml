@@ -16,6 +16,16 @@
                 </tr>
             </tbody>
         </xpath>
+
+        <xpath expr="//div/div/table/tr[last()]" position="before">
+            <tr>
+                <td>Retención</td>
+                <td class="text-right">
+                    <span t-field="o.wh_taxes"
+                        t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                </td>
+            </tr>
+        </xpath>        
     </template>
 
 </data>
