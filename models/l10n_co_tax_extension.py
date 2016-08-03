@@ -94,16 +94,15 @@ class ColombianTaxes(models.Model):
         move_lines.insert(-1, wh_line)
         return move_lines
 
-    def _get_tax_amount_by_group(self):
-        res = super(ColombianTaxes, self)._get_tax_amount_by_group()
-        groups_not_in_invoice = self.env['account.tax.group'].search([('not_in_invoice','=',True)])
+    def at_least_one_tax_group_enabled(self):
+        res = False
+        groups_not_in_invoice = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True)])]
 
-        for g in groups_not_in_invoice:
-            for i in res:
-                if g.name == i[0]:
-                    res.remove(i) 
-        
-        return res
+        for line in self.tax_line_ids:
+            if line.tax_id.tax_group_id.id in groups_not_in_invoice:
+                res = True
+
+        return res 
 
 class AccountTax(models.Model):
     _name = 'account.tax'
