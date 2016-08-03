@@ -65,17 +65,16 @@ class ColombianTaxes(models.Model):
 
     @api.multi
     def finalize_invoice_move_lines(self, move_lines):
-        part = self.env['res.partner']._find_accounting_partner(self.partner_id)
         account = self.env['account.account'].search([('code', '=', '135515')])
 
         for tp_line in move_lines:
             line = tp_line[2]
-            if line['name'] == '/':
+            if line['account_id'] == self.account_id.id:
                 line['debit'] = line['debit'] - self.wh_taxes
                 wh_line = (0, 0,
                              {
                                  'date_maturity': False,
-                                 'partner_id': part.id,
+                                 'partner_id': self.partner_id.id,
                                  'name': 'Retención a la fuente',
                                  'debit': self.wh_taxes,
                                  'credit': False,
@@ -90,8 +89,8 @@ class ColombianTaxes(models.Model):
                                  'invoice_id': self.id,
                                  'tax_ids': False,
                                  'tax_line_id': False,
-                             })
-
+                             })        
+        
         move_lines.insert(-1, wh_line)
         return move_lines
 
