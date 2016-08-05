@@ -40,11 +40,11 @@
               <field name="inherit_id" ref="product.product_template_form_view"/>
               <field name="arch" type="xml">
                 <field name="taxes_id" widget="many2many_tags" position="replace">
-                  <field name="taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                  <field name="taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','!=',True),
                                                                           ('type_tax_use', '=', 'sale')]" />
                 </field>
                 <field name="supplier_taxes_id" widget="many2many_tags" position="replace">
-                  <field name="supplier_taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                  <field name="supplier_taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','!=',True),
                                                                                    ('type_tax_use', '=', 'purchase')]" />
                 </field>
               </field>
