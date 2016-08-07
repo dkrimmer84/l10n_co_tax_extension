@@ -21,6 +21,8 @@
 from openerp import api, fields, models
 
 import pprint
+from openerp.exceptions import UserError, ValidationError
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -127,6 +129,30 @@ class AccountTax(models.Model):
         help="Account that will be set on invoice tax lines for invoices. Leave empty to use the expense account.")
     refund_account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart on Refunds', ondelete='restrict',                                         
         help="Account that will be set on invoice tax lines for refunds. Leave empty to use the expense account.")
+    position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related id')
+    base_taxes = fields.One2many('account.base.tax', 'tax_id', string='Base taxes', help='This field show related taxes applied to this tax')
+
+class AccountBaseTax(models.Model): 
+    _name = 'account.base.tax'
+    
+    tax_id = fields.Many2one('account.tax', string='Tax related')
+    start_date = fields.Date(string='Since date', required=True)
+    end_date = fields.Date(string='Until date', required=True)
+    amount = fields.Float(digits=0, default=0, string="Tax amount", required=True)
+    # currency_id = fields.Many2one('res.currency', related='tax_id.company_id.currency_id', store=True)
+
+    @api.one
+    @api.constrains('start_date', 'end_date')
+    def _check_closing_date(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError("Error! End date cannot be set before start date.")
+
+    @api.multi
+    @api.constrains('start_date', 'end_date')
+    def _dont_overlap_date(self):
+        pass
+        # raise ValidationError("Error! cannot have overlap date range.")
+        
 
 class AccountTaxGroup(models.Model):
     _name = 'account.tax.group'
@@ -134,3 +160,10 @@ class AccountTaxGroup(models.Model):
 
     not_in_invoice = fields.Boolean(string="Don't show in invoice", default=False,
         help="Check this if you want to hide the taxes in this group when print an invoice") 
+
+class AccountFiscalPosition(models.Model):
+    _name = 'account.fiscal.position'
+    _inherit = 'account.fiscal.position'
+
+    tax_ids_in_invoice = fields.One2many('account.tax', 'position_id',
+        string='Taxes that refer to the partner')        
