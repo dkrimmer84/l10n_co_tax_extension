@@ -95,17 +95,11 @@
                 <xpath expr="//notebook" position="inside">
                   <page name="taxes_in_invoice" string="Taxes in invoice">
                     <group>
-                        <field name="tax_ids_in_invoice" widget="one2many_list" nolabel="1">
-                            <tree string="Taxes in invoice" editable="bottom">
-                            <!-- estos campos deberían de ser many2one en el modelo para poder tener una lista -->
-                                <field name="name"/> 
-                                <field name="amount"/>
-                            </tree>
-                            <form string="Taxes in invoice">
-                                <field name="name"/>
-                                <field name="amount"/>
-                            </form>
-                        </field>
+                      <field name="tax_ids_invoice" widget="one2many_list" nolabel="1">
+                        <tree editable="bottom">
+                          <field name="tax_id" />
+                        </tree>
+                      </field>
                     </group>
                   </page>                  
                 </xpath>

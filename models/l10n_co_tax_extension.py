@@ -147,10 +147,12 @@ class AccountBaseTax(models.Model):
         if self.start_date and self.end_date and self.end_date < self.start_date:
             raise ValidationError("Error! End date cannot be set before start date.")
 
-    @api.multi
+    @api.one
     @api.constrains('start_date', 'end_date')
     def _dont_overlap_date(self):
-        pass
+        bases = self.search([('tax_id','=',self.tax_id.id)])        
+        _logger.info(bases)
+
         # raise ValidationError("Error! cannot have overlap date range.")
         
 
@@ -161,9 +163,15 @@ class AccountTaxGroup(models.Model):
     not_in_invoice = fields.Boolean(string="Don't show in invoice", default=False,
         help="Check this if you want to hide the taxes in this group when print an invoice") 
 
+class AccountFiscalPositionTaxes(models.Model):
+    _name = 'account.fiscal.position.base.tax'
+
+    position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
+    tax_id = fields.Many2one('account.tax', string='Tax')
+
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'
     _inherit = 'account.fiscal.position'
 
-    tax_ids_in_invoice = fields.One2many('account.tax', 'position_id',
-        string='Taxes that refer to the partner')        
+    tax_ids_invoice = fields.One2many('account.fiscal.position.base.tax', 'position_id',
+        string='Taxes that refer to the fiscal position')
