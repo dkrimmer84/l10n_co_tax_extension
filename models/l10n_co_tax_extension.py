@@ -147,13 +147,16 @@ class AccountBaseTax(models.Model):
         if self.start_date and self.end_date and self.end_date < self.start_date:
             raise ValidationError("Error! End date cannot be set before start date.")
 
-    @api.one
+    @api.multi
     @api.constrains('start_date', 'end_date')
     def _dont_overlap_date(self):
-        bases = self.search([('tax_id','=',self.tax_id.id)])        
-        _logger.info(bases)
-
-        # raise ValidationError("Error! cannot have overlap date range.")
+        bases_ids = self.search([('start_date', '<=', self.end_date),
+                                 ('end_date', '>=', self.start_date),
+                                 ('tax_id', '=', self.tax_id.id),
+                                 ('id', '<>', self.id)])
+        
+        if bases_ids:
+            raise ValidationError("Error! cannot have overlap date range.")
         
 
 class AccountTaxGroup(models.Model):
@@ -168,6 +171,7 @@ class AccountFiscalPositionTaxes(models.Model):
 
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
     tax_id = fields.Many2one('account.tax', string='Tax')
+    amount = fields.Float(related='tax_id.amount', store=True, readonly=True)
 
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'

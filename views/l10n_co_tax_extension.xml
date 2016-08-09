@@ -38,7 +38,7 @@
                     <page string="Bases">
                       <group>
                         <field name="base_taxes" widget="one2many_list" nolabel="1">
-                          <tree>
+                          <tree editable="bottom">
                             <field name="start_date" />
                             <field name="end_date" />
                             <field name="amount" widget="monetary" />
@@ -98,11 +98,30 @@
                       <field name="tax_ids_invoice" widget="one2many_list" nolabel="1">
                         <tree editable="bottom">
                           <field name="tax_id" />
+                          <field name="amount" widget="monetary"/>
+                          <!--<label string="%" class="oe_inline" widget="monetary"/>-->
                         </tree>
                       </field>
                     </group>
                   </page>                  
                 </xpath>
+              </field>
+            </record>
+
+            <record id="account_fiscal_position_base_tax_form" model="ir.ui.view">
+              <field name="name">account.fiscal.position.base.tax.form</field>
+              <field name="model">account.fiscal.position.base.tax</field>
+              <field name="arch" type="xml">
+                <form>
+                  <group>
+                    <group>
+                      <field name="tax_id" />
+                    </group>
+                    <group>
+                      <field name="amount" />
+                    </group>
+                  </group>
+                </form>
               </field>
             </record>
     </data>
