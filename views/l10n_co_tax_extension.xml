@@ -97,9 +97,8 @@
                     <group>
                       <field name="tax_ids_invoice" widget="one2many_list" nolabel="1">
                         <tree editable="bottom">
-                          <field name="tax_id" />
+                          <field name="tax_id" domain="[('tax_in_invoice','=',True)]" />
                           <field name="amount" widget="monetary"/>
-                          <!--<label string="%" class="oe_inline" widget="monetary"/>-->
                         </tree>
                       </field>
                     </group>

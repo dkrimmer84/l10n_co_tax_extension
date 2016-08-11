@@ -22,6 +22,7 @@ from openerp import api, fields, models
 
 import pprint
 from openerp.exceptions import UserError, ValidationError
+from openerp.tools.translate import _
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -172,6 +173,19 @@ class AccountFiscalPositionTaxes(models.Model):
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
     tax_id = fields.Many2one('account.tax', string='Tax')
     amount = fields.Float(related='tax_id.amount', store=True, readonly=True)
+
+    # _sql_constraints = [
+    #     ('tax_fiscal_position_uniq', 'unique(position_id, tax_id)', _('Error! cannot have repeated taxes'))
+    # ]
+    
+    @api.constrains('tax_id')
+    def _check_dont_repeat_tax(self):
+        local_taxes = self.search([('position_id', '=', self.position_id.id),
+                                   ('tax_id', '=', self.tax_id.id),
+                                   ('id', '<>', self.id)])
+        
+        if local_taxes:
+            raise ValidationError("Error! cannot have repeated taxes")
 
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'
