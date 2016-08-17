@@ -53,8 +53,8 @@ class AccountInvoice(models.Model):
         # Calling the original calculation
         super(AccountInvoice, self)._compute_amount()
 
-        for tax in self.fiscal_position_id.tax_ids_invoice:
-            _logger.warn({ 'name': self.fiscal_position_id.name, 'tax': tax.tax_id.name })         
+        # for tax in self.fiscal_position_id.tax_ids_invoice:
+            # _logger.warn({ 'name': self.fiscal_position_id.name, 'tax': tax.tax_id.name })         
 
         self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.name != 'WITHHOLDING')
         self.amount_without_wh_tax = self.amount_untaxed + self.amount_tax
@@ -124,25 +124,31 @@ class AccountInvoice(models.Model):
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
         super(AccountInvoice, self)._onchange_partner_id()
+        
+    @api.multi
+    def get_taxes_values(self):
+        # tax_grouped = {}
+        tax_grouped = super(AccountInvoice, self).get_taxes_values()
 
-        account_invoice_tax = self.env['account.invoice.tax']
-        ctx = dict(self._context)
-        tax_grouped = {}
         if self.fiscal_position_id:
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             fp.ensure_one()
-            for base in fp.tax_ids_invoice:
-                tax = base.tax_id
+            _logger.warn([tax.tax_id.id for tax in fp.tax_ids_invoice])
+            tax_ids = self.env['account.tax'].browse([tax.tax_id.id for tax in fp.tax_ids_invoice])
+            price_unit = self.amount_untaxed 
+            taxes = fp.tax_ids_invoice.tax_id.compute_all(price_unit, self.currency_id, partner=self.partner_id)['taxes']
+            _logger.warn(taxes)
+            for tax in taxes:
                 val = {
-                        'invoice_id': self.id,
-                        'name': tax['name'],
-                        'tax_id': tax['id'],
-                        'amount': 0,
-                        'manual': False,
-                        'sequence': tax['sequence'],
-                        'account_analytic_id': tax['analytic'] or False,
-                        'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'].id or tax['refund_account_id'].id, 
-                    }
+                    'invoice_id': self.id,
+                    'name': tax['name'],
+                    'tax_id': tax['id'],
+                    'amount': tax['amount'],
+                    'manual': False,
+                    'sequence': tax['sequence'],
+                    'account_analytic_id': tax['analytic'] or False,
+                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                }
 
                 key = str(tax['id']) + '-' + str(val['account_id'])
                 
@@ -150,19 +156,8 @@ class AccountInvoice(models.Model):
                     tax_grouped[key] = val
                 else:
                     tax_grouped[key]['amount'] += val['amount']
-        
-        for tax in tax_grouped.values():
-            _logger.warn(tax)
-            account_invoice_tax.create(tax)
 
-        # dummy write on self to trigger recomputations
-        self.with_context(ctx).write({'invoice_line_ids': []})
-        
-        tax_lines = self.tax_line_ids.browse([])
-        for tax in tax_grouped.values():
-            tax_lines += tax_lines.new(tax)
-        self.tax_line_ids = tax_lines
-
+        return tax_grouped
 
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
