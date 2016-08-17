@@ -11,7 +11,7 @@
                     <field name="amount_without_wh_tax" style="border-top: 1px solid #cacaca;"/>
                   </field>
                   <field name="amount_total" position="before">
-                    <field name="wh_taxes" class="ColombianTaxes" />
+                    <field name="wh_taxes" />
                   </field>
                 </field>
             </record>
