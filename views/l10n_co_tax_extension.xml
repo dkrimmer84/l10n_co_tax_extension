@@ -8,10 +8,10 @@
                 <field name="arch" type="xml">
                   <!--  Withholding calculation -->
                   <field name="amount_tax" position="after">
-                    <field name="amount_without_wh_tax" style="border-top: 1px solid #cacaca;"/>
+                    <field name="amount_without_wh_tax" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" style="border-top: 1px solid #cacaca;"/>
                   </field>
                   <field name="amount_total" position="before">
-                    <field name="wh_taxes" />
+                    <field name="wh_taxes" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" />
                   </field>
                 </field>
             </record>

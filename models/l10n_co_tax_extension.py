@@ -35,8 +35,6 @@ class AccountInvoice(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
-    TWH = 0.025
-
     # Define withholding as new tax.
     wh_taxes = fields.Monetary('Withholding Tax', store="True",
                                compute="_compute_amount")
@@ -53,52 +51,25 @@ class AccountInvoice(models.Model):
         # Calling the original calculation
         super(AccountInvoice, self)._compute_amount()
 
-        # for tax in self.fiscal_position_id.tax_ids_invoice:
-            # _logger.warn({ 'name': self.fiscal_position_id.name, 'tax': tax.tax_id.name })         
+        if self.fiscal_position_id:
+            fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
+            tax_ids = [base_tax.tax_id.id for base_tax in fp.tax_ids_invoice]
+            # ids = [tax.id for tax in tax_ids]
 
-        self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.name != 'WITHHOLDING')
+            self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.id not in tax_ids)
+
+            # wh_account_id = self.env['account.account'].search([('code', '=', '135515')]).id
+            # wh_amount = self.env['account.tax'].search([('account_id', '=', wh_account_id)]).amount
+            # self.wh_taxes = self.amount_untaxed * (wh_amount / 100)
+            self.wh_taxes = self.amount_untaxed * (2.5 / 100)
+        else: 
+            self.amount_tax = sum(line.amount for line in self.tax_line_ids)
+
         self.amount_without_wh_tax = self.amount_untaxed + self.amount_tax
-        # Extending the calculation with the colombian withholding tax
-        # TODO: 0.025 is a static value right now. This will be dynamic
-        self.wh_taxes = self.amount_untaxed * self.TWH
-        # self.amount_total -= self.wh_taxes
-        #Calling the original calculation did not call the local var sign.
+
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
-
-        # Because python is interpreted it need to recalculate
-        # amount_total_signed again.
         self.amount_total_signed = self.amount_total * sign
-
-    # @api.multi
-    # def finalize_invoice_move_lines(self, move_lines):
-    #     account = self.env['account.account'].search([('code', '=', '135515')])
-
-    #     for tp_line in move_lines:
-    #         line = tp_line[2]
-    #         if line['account_id'] == self.account_id.id:
-    #             line['debit'] = line['debit'] - self.wh_taxes
-    #             wh_line = (0, 0,
-    #                          {
-    #                              'date_maturity': False,
-    #                              'partner_id': self.partner_id.id,
-    #                              'name': 'Retención a la fuente',
-    #                              'debit': self.wh_taxes,
-    #                              'credit': False,
-    #                              'account_id': account.id,
-    #                              'analytic_line_ids': False,
-    #                              'amount_currency': 0,
-    #                              'currency_id': False,
-    #                              'quantity': 1,
-    #                              'product_id': False,
-    #                              'product_uom_id': False,
-    #                              'analytic_account_id': False,
-    #                              'invoice_id': self.id,
-    #                              'tax_ids': False,
-    #                              'tax_line_id': False,
-    #                          })        
         
-    #     move_lines.insert(-1, wh_line)
-    #     return move_lines
 
     def _get_tax_amount_by_group(self):
         res = super(AccountInvoice, self)._get_tax_amount_by_group()
@@ -127,17 +98,15 @@ class AccountInvoice(models.Model):
         
     @api.multi
     def get_taxes_values(self):
-        # tax_grouped = {}
         tax_grouped = super(AccountInvoice, self).get_taxes_values()
 
         if self.fiscal_position_id:
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             fp.ensure_one()
-            _logger.warn([tax.tax_id.id for tax in fp.tax_ids_invoice])
             tax_ids = self.env['account.tax'].browse([tax.tax_id.id for tax in fp.tax_ids_invoice])
             price_unit = self.amount_untaxed 
-            taxes = fp.tax_ids_invoice.tax_id.compute_all(price_unit, self.currency_id, partner=self.partner_id)['taxes']
-            _logger.warn(taxes)
+            taxes = tax_ids.compute_all(price_unit, self.currency_id, partner=self.partner_id)['taxes']
+
             for tax in taxes:
                 val = {
                     'invoice_id': self.id,
@@ -150,8 +119,8 @@ class AccountInvoice(models.Model):
                     'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
                 }
 
-                key = str(tax['id']) + '-' + str(val['account_id'])
-                
+                key = tax['id']
+
                 if key not in tax_grouped:
                     tax_grouped[key] = val
                 else:
@@ -163,10 +132,6 @@ class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
     _inherit = 'account.invoice.line'
 
-    def _set_taxes(self):
-        # _logger.warn({'name': fp.name, 'tax_ids': fp.tax_ids_invoice})
-        super(AccountInvoiceLine, self)._set_taxes()
-        
 class AccountTax(models.Model):
     _name = 'account.tax'
     _inherit = 'account.tax'
