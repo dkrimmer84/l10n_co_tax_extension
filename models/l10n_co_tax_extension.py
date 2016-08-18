@@ -131,15 +131,16 @@ class AccountInvoice(models.Model):
 
         return tax_grouped
 
-    @api.onchange('fiscal_position_id')
+    @api.onchange('fiscal_position_id','date_invoice')
     def _onchange_fiscal_position_id(self):
-        if not self.fiscal_position_id:
+        self._onchange_invoice_line_ids()
+
+        if not self.date_invoice:
             warning = {
                 'title': _('Warning!'),
-                'message': _('You must assign a fiscal position')
+                'message': _('You must assign a date')
             }
             return {'warning': warning}
-
 
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
