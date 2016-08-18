@@ -55,13 +55,9 @@ class AccountInvoice(models.Model):
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             tax_ids = [base_tax.tax_id.id for base_tax in fp.tax_ids_invoice]
             # ids = [tax.id for tax in tax_ids]
-
-            self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.id not in tax_ids)
-
-            # wh_account_id = self.env['account.account'].search([('code', '=', '135515')]).id
-            # wh_amount = self.env['account.tax'].search([('account_id', '=', wh_account_id)]).amount
-            # self.wh_taxes = self.amount_untaxed * (wh_amount / 100)
-            self.wh_taxes = self.amount_untaxed * (2.5 / 100)
+            
+            self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.id not in tax_ids)            
+            self.wh_taxes = abs(sum(line.amount for line in self.tax_line_ids if line.tax_id.id in tax_ids))
         else: 
             self.amount_tax = sum(line.amount for line in self.tax_line_ids)
 
@@ -69,7 +65,6 @@ class AccountInvoice(models.Model):
 
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_signed = self.amount_total * sign
-        
 
     def _get_tax_amount_by_group(self):
         res = super(AccountInvoice, self)._get_tax_amount_by_group()
@@ -104,29 +99,47 @@ class AccountInvoice(models.Model):
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             fp.ensure_one()
             tax_ids = self.env['account.tax'].browse([tax.tax_id.id for tax in fp.tax_ids_invoice])
+            
             price_unit = self.amount_untaxed 
             taxes = tax_ids.compute_all(price_unit, self.currency_id, partner=self.partner_id)['taxes']
 
+            tax_ids = [base_tax.tax_id.id for base_tax in fp.tax_ids_invoice]
+            base_taxes = self.env['account.base.tax'].search_read([('start_date','<=',self.date_invoice),
+                                                                   ('end_date','>=',self.date_invoice),
+                                                                   ('tax_id','in',tax_ids)], ['amount'])
+
             for tax in taxes:
-                val = {
-                    'invoice_id': self.id,
-                    'name': tax['name'],
-                    'tax_id': tax['id'],
-                    'amount': tax['amount'],
-                    'manual': False,
-                    'sequence': tax['sequence'],
-                    'account_analytic_id': tax['analytic'] or False,
-                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                }
+                for base in base_taxes: 
+                    if self.amount_without_wh_tax >= base['amount']:
+                        val = {
+                            'invoice_id': self.id,
+                            'name': tax['name'],
+                            'tax_id': tax['id'],
+                            'amount': tax['amount'],
+                            'manual': False,
+                            'sequence': tax['sequence'],
+                            'account_analytic_id': tax['analytic'] or False,
+                            'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                        }
 
-                key = tax['id']
+                        key = tax['id']
 
-                if key not in tax_grouped:
-                    tax_grouped[key] = val
-                else:
-                    tax_grouped[key]['amount'] += val['amount']
+                        if key not in tax_grouped:
+                            tax_grouped[key] = val
+                        else:
+                            tax_grouped[key]['amount'] += val['amount']
 
         return tax_grouped
+
+    @api.onchange('fiscal_position_id')
+    def _onchange_fiscal_position_id(self):
+        if not self.fiscal_position_id:
+            warning = {
+                'title': _('Warning!'),
+                'message': _('You must assign a fiscal position')
+            }
+            return {'warning': warning}
+
 
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
