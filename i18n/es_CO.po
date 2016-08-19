@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0c-20160428\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-29 16:48+0000\n"
-"PO-Revision-Date: 2016-07-29 16:48+0000\n"
+"POT-Creation-Date: 2016-08-05 01:54+0000\n"
+"PO-Revision-Date: 2016-08-05 01:54+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -26,6 +26,16 @@ msgid "Account that will be set on invoice tax lines for refunds. Leave empty to
 msgstr "Cuenta que será establecida por defecto en las líneas de impuesto para las notas de crédito. Déjelo vacío para usar la cuenta de gastos."
 
 #. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Amount"
+msgstr "Cantidad"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Base"
+msgstr "Base"
+
+#. module: l10n_co_tax_extension
 #: model:ir.model.fields,help:l10n_co_tax_extension.field_account_tax_dont_impact_balance
 msgid "Check this if you want to assign counterpart taxes accounts"
 msgstr "Activalo si quieres asignar un cuenta de contrapartida de impuestos"
@@ -36,14 +46,24 @@ msgid "Check this if you want to hide the tax from the taxes list in products"
 msgstr "Activa esto si quieres evitar que aparezca en la lista de impuesto de los productos"
 
 #. module: l10n_co_tax_extension
+#: model:ir.model.fields,help:l10n_co_tax_extension.field_account_tax_group_not_in_invoice
+msgid "Check this if you want to hide the taxes in this group when print an invoice"
+msgstr "Check this if you want to hide the taxes in this group when print an invoice"
+
+#. module: l10n_co_tax_extension
 #: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_tax_dont_impact_balance
 msgid "Don't impact balance"
 msgstr "No afecta al saldo"
 
 #. module: l10n_co_tax_extension
+#: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_tax_group_not_in_invoice
+msgid "Don't show in invoice"
+msgstr "No mostrar en factura"
+
+#. module: l10n_co_tax_extension
 #: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_tax_tax_in_invoice
 msgid "Evaluate in invoice"
-msgstr "Evaluar en factura?"
+msgstr "Evaluar en factura"
 
 #. module: l10n_co_tax_extension
 #: model:ir.model,name:l10n_co_tax_extension.model_account_invoice
@@ -51,7 +71,13 @@ msgid "Invoice"
 msgstr "Factura"
 
 #. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Retención"
+msgstr "Retención"
+
+#. module: l10n_co_tax_extension
 #: model:ir.model,name:l10n_co_tax_extension.model_account_tax
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
 msgid "Tax"
 msgstr "Impuesto"
 
@@ -71,7 +97,16 @@ msgid "Total With Tax"
 msgstr "Total Con Impuestos"
 
 #. module: l10n_co_tax_extension
+#: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_invoice_website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del Sitio Web"
+
+#. module: l10n_co_tax_extension
+#: model:ir.model.fields,help:l10n_co_tax_extension.field_account_invoice_website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"
+
+#. module: l10n_co_tax_extension
 #: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_invoice_wh_taxes
 msgid "Withholding Tax"
 msgstr "Retencion a la Fuente"
-

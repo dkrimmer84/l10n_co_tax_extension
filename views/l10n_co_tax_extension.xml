@@ -3,51 +3,125 @@
     <data>
             <!-- Extending Invoice Form View -->
             <record id="invoice_form" model="ir.ui.view">
-              <field name="inherit_id" ref="account.invoice_form"/>
               <field name="model">account.invoice</field>
+              <field name="inherit_id" ref="account.invoice_form"/>
                 <field name="arch" type="xml">
                   <!--  Withholding calculation -->
                   <field name="amount_tax" position="after">
-                    <field name="amount_without_wh_tax" style="border-top: 1px solid #cacaca;"/>
+                    <field name="amount_without_wh_tax" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" style="border-top: 1px solid #cacaca;"/>
                   </field>
                   <field name="amount_total" position="before">
-                    <field name="wh_taxes" class="ColombianTaxes" />
+                    <field name="wh_taxes" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" />
                   </field>
                 </field>
             </record>
 
             <record id="view_tax_form" model="ir.ui.view">
-              <field name="inherit_id" ref="account.view_tax_form"/>
               <field name="model">account.tax</field>
+              <field name="inherit_id" ref="account.view_tax_form"/>
               <field name="arch" type="xml">
                 <field name="type_tax_use" position="after">
                   <field name="tax_in_invoice" />
                 </field>
+
                 <xpath expr="//div[@attrs]" position="after">
                   <field name="dont_impact_balance" attrs="{'invisible':[('amount_type','=', 'group')]}"/>
                 </xpath> 
+
                 <field name="refund_account_id" position="after">
                   <field name="account_id_counterpart" attrs="{'invisible':[('dont_impact_balance','=', False)]}"/>
                   <field name="refund_account_id_counterpart" attrs="{'invisible':[('dont_impact_balance','=', False)]}"/>
                 </field>
+
+                <xpath expr="//notebook/page[1]" position="inside">
+                  <notebook>
+                    <page string="Bases">
+                      <group>
+                        <field name="base_taxes" widget="one2many_list" nolabel="1">
+                          <tree editable="bottom">
+                            <field name="start_date" />
+                            <field name="end_date" />
+                            <field name="amount" widget="monetary" />
+                            <!--<field name="currency_id" invisible="1" />-->
+                          </tree>
+                        </field>
+                      </group>
+                    </page>
+                  </notebook>
+                </xpath>
+              </field>
+            </record>
+
+            <record id="account_base_tax_form_view" model="ir.ui.view">
+              <field name="name">account.base.tax.form</field>
+              <field name="model">account.base.tax</field>
+              <field name="arch" type="xml">
+                <form string="Base taxes">
+                  <group>
+                    <group>
+                      <field name="start_date" />
+                      <field name="amount"/>
+                      <!--<field name="currency_id" invisible="1"/>-->
+                    </group>
+                    <group>
+                      <field name="end_date" />
+                    </group>
+                  </group>
+                </form>
               </field>
             </record>
 
             <record id="product_template_form_view" model="ir.ui.view">
-              <field name="name">product.template.form.inherit.l10n_co</field>
               <field name="model">product.template</field>
-              <field name="priority">9</field>
               <field name="inherit_id" ref="product.product_template_form_view"/>
+              <field name="priority">9</field>
               <field name="arch" type="xml">
                 <field name="taxes_id" widget="many2many_tags" position="replace">
-                  <field name="taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                  <field name="taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','!=',True),
                                                                           ('type_tax_use', '=', 'sale')]" />
                 </field>
                 <field name="supplier_taxes_id" widget="many2many_tags" position="replace">
-                  <field name="supplier_taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','=',True),
+                  <field name="supplier_taxes_id" widget="many2many_tags" domain="[('tax_in_invoice','!=',True),
                                                                                    ('type_tax_use', '=', 'purchase')]" />
                 </field>
               </field>
             </record> 
+
+            <record id="account_fiscal_position_inherit_view" model="ir.ui.view">
+              <field name="model">account.fiscal.position</field>
+              <field name="inherit_id" ref="account.view_account_position_form"/>
+              <field name="priority">9</field>              
+              <field name="arch" type="xml">
+                <xpath expr="//notebook" position="inside">
+                  <page name="taxes_in_invoice" string="Taxes in invoice">
+                    <group>
+                      <field name="tax_ids_invoice" widget="one2many_list" nolabel="1">
+                        <tree editable="bottom">
+                          <field name="tax_id" domain="[('tax_in_invoice','=',True)]" />
+                          <field name="amount" widget="monetary"/>
+                        </tree>
+                      </field>
+                    </group>
+                  </page>                  
+                </xpath>
+              </field>
+            </record>
+
+            <record id="account_fiscal_position_base_tax_form" model="ir.ui.view">
+              <field name="name">account.fiscal.position.base.tax.form</field>
+              <field name="model">account.fiscal.position.base.tax</field>
+              <field name="arch" type="xml">
+                <form>
+                  <group>
+                    <group>
+                      <field name="tax_id" />
+                    </group>
+                    <group>
+                      <field name="amount" />
+                    </group>
+                  </group>
+                </form>
+              </field>
+            </record>
     </data>
 </openerp>
