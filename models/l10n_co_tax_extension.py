@@ -85,7 +85,7 @@ class AccountInvoice(models.Model):
             if line.tax_id.tax_group_id.id in groups_not_in_invoice:
                 res = True
 
-        return res 
+        return res
     
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
@@ -133,14 +133,10 @@ class AccountInvoice(models.Model):
 
     @api.onchange('fiscal_position_id','date_invoice')
     def _onchange_fiscal_position_id(self):
-        self._onchange_invoice_line_ids()
-
         if not self.date_invoice:
-            warning = {
-                'title': _('Warning!'),
-                'message': _('You must assign a date')
-            }
-            return {'warning': warning}
+            self.date_invoice = fields.Date.context_today(self)
+            
+        self._onchange_invoice_line_ids()
 
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
