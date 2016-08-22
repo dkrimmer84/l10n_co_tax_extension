@@ -68,22 +68,28 @@ class AccountInvoice(models.Model):
 
     def _get_tax_amount_by_group(self):
         res = super(AccountInvoice, self)._get_tax_amount_by_group()
-        groups_not_in_invoice = self.env['account.tax.group'].search([('not_in_invoice','=',True)])
+        groups_not_in_invoice = self.env['account.tax.group'].search_read([('not_in_invoice','=',True)],['name'])
 
         for g in groups_not_in_invoice:
             for i in res:
-                if g.name == i[0]:
+                if g['name'] == i[0]:
                     res.remove(i)
 
         return res
 
     def at_least_one_tax_group_enabled(self):
         res = False
-        groups_not_in_invoice = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True)])]
-
-        for line in self.tax_line_ids:
-            if line.tax_id.tax_group_id.id in groups_not_in_invoice:
-                res = True
+        groups = self.env['account.tax'].search_read([('id','in',[invoice_tax.tax_id.id for invoice_tax in self.tax_line_ids])],['tax_group_id'])
+        
+        in_invoice = set()
+        for group in groups:
+            in_invoice.add(group['tax_group_id'][0])
+        in_invoice = list(in_invoice)
+        
+        dont_show = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True),
+                                                                         ('id','in',in_invoice)])]
+        if len(dont_show) < len(in_invoice):
+            res = True
 
         return res
     
