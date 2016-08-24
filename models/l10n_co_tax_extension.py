@@ -41,7 +41,7 @@ class AccountInvoice(models.Model):
 
     amount_without_wh_tax = fields.Monetary('Total With Tax', store="True",
                                             compute="_compute_amount")
-
+    date_invoice = fields.Date(required=True)
     # Calculate withholding tax and (new) total amount
     def _compute_amount(self):
         """
@@ -92,10 +92,17 @@ class AccountInvoice(models.Model):
             res = True
 
         return res
-    
+                    
+    def _onchange_payment_term_date_invoice(self):
+        self.date_invoice = fields.Date.context_today(self)
+        super(AccountInvoice, self)._onchange_payment_term_date_invoice()
+        self._onchange_invoice_line_ids()
+
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
+        self.date_invoice = fields.Date.context_today(self)
         super(AccountInvoice, self)._onchange_partner_id()
+        self._onchange_invoice_line_ids()
         
     @api.multi
     def get_taxes_values(self):
