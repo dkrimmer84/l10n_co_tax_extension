@@ -43,6 +43,9 @@ class AccountInvoice(models.Model):
                                             compute="_compute_amount")
     date_invoice = fields.Date(required=True)
     # Calculate withholding tax and (new) total amount
+    
+    @api.one
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
     def _compute_amount(self):
         """
         This functions computes the withholding tax on the untaxed amount
@@ -66,6 +69,7 @@ class AccountInvoice(models.Model):
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_signed = self.amount_total * sign
 
+    @api.multi
     def _get_tax_amount_by_group(self):
         res = super(AccountInvoice, self)._get_tax_amount_by_group()
         groups_not_in_invoice = self.env['account.tax.group'].search_read([('not_in_invoice','=',True)],['name'])
@@ -92,11 +96,12 @@ class AccountInvoice(models.Model):
             res = True
 
         return res
-                    
+    
+    @api.onchange('payment_term_id', 'date_invoice')
     def _onchange_payment_term_date_invoice(self):
         self.date_invoice = fields.Date.context_today(self)
-        super(AccountInvoice, self)._onchange_payment_term_date_invoice()
         self._onchange_invoice_line_ids()
+        super(AccountInvoice, self)._onchange_payment_term_date_invoice()
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
@@ -112,7 +117,9 @@ class AccountInvoice(models.Model):
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             fp.ensure_one()
 
+            type_tax = 'sale' if self.type in ('out_invoice', 'out_refund') else 'purchase'
             tax_ids = self.env['account.tax'].search([('id','in',[tax.tax_id.id for tax in fp.tax_ids_invoice]),
+                                                      ('type_tax_use','=',type_tax),
                                                       ('base_taxes','>',0)])
 
             tax_ids = [tax.id for tax in tax_ids]
@@ -146,8 +153,7 @@ class AccountInvoice(models.Model):
     @api.onchange('fiscal_position_id','date_invoice')
     def _onchange_fiscal_position_id(self):
         if not self.date_invoice:
-            self.date_invoice = fields.Date.context_today(self)
-            
+            self.date_invoice = fields.Date.context_today(self)            
         self._onchange_invoice_line_ids()
 
 class AccountInvoiceLine(models.Model):
