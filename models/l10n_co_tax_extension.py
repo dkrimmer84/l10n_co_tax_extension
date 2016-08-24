@@ -134,7 +134,7 @@ class AccountInvoice(models.Model):
                     'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
                 }
 
-                key = tax['id']
+                key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
 
                 if key not in tax_grouped:
                     tax_grouped[key] = val
