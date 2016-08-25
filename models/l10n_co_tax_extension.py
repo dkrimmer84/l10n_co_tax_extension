@@ -100,14 +100,14 @@ class AccountInvoice(models.Model):
     @api.onchange('payment_term_id', 'date_invoice')
     def _onchange_payment_term_date_invoice(self):
         self.date_invoice = fields.Date.context_today(self)
-        self._onchange_invoice_line_ids()
+        # self._onchange_invoice_line_ids()
         super(AccountInvoice, self)._onchange_payment_term_date_invoice()
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
         self.date_invoice = fields.Date.context_today(self)
         super(AccountInvoice, self)._onchange_partner_id()
-        self._onchange_invoice_line_ids()
+        # self._onchange_invoice_line_ids()
         
     @api.multi
     def get_taxes_values(self):
