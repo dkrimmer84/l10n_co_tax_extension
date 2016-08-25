@@ -41,8 +41,11 @@ class AccountInvoice(models.Model):
 
     amount_without_wh_tax = fields.Monetary('Total With Tax', store="True",
                                             compute="_compute_amount")
-
+    date_invoice = fields.Date(required=True)
     # Calculate withholding tax and (new) total amount
+    
+    @api.one
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
     def _compute_amount(self):
         """
         This functions computes the withholding tax on the untaxed amount
@@ -66,30 +69,45 @@ class AccountInvoice(models.Model):
         sign = self.type in ['in_refund', 'out_refund'] and -1 or 1
         self.amount_total_signed = self.amount_total * sign
 
+    @api.multi
     def _get_tax_amount_by_group(self):
         res = super(AccountInvoice, self)._get_tax_amount_by_group()
-        groups_not_in_invoice = self.env['account.tax.group'].search([('not_in_invoice','=',True)])
+        groups_not_in_invoice = self.env['account.tax.group'].search_read([('not_in_invoice','=',True)],['name'])
 
         for g in groups_not_in_invoice:
             for i in res:
-                if g.name == i[0]:
+                if g['name'] == i[0]:
                     res.remove(i)
 
         return res
 
     def at_least_one_tax_group_enabled(self):
         res = False
-        groups_not_in_invoice = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True)])]
-
-        for line in self.tax_line_ids:
-            if line.tax_id.tax_group_id.id in groups_not_in_invoice:
-                res = True
+        groups = self.env['account.tax'].search_read([('id','in',[invoice_tax.tax_id.id for invoice_tax in self.tax_line_ids])],['tax_group_id'])
+        
+        in_invoice = set()
+        for group in groups:
+            in_invoice.add(group['tax_group_id'][0])
+        in_invoice = list(in_invoice)
+        
+        dont_show = [i.id for i in self.env['account.tax.group'].search([('not_in_invoice','=',True),
+                                                                         ('id','in',in_invoice)])]
+        if len(dont_show) < len(in_invoice):
+            res = True
 
         return res
     
+    @api.onchange('payment_term_id', 'date_invoice')
+    def _onchange_payment_term_date_invoice(self):
+        self.date_invoice = fields.Date.context_today(self)
+        # self._onchange_invoice_line_ids()
+        super(AccountInvoice, self)._onchange_payment_term_date_invoice()
+
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
+        self.date_invoice = fields.Date.context_today(self)
         super(AccountInvoice, self)._onchange_partner_id()
+        # self._onchange_invoice_line_ids()
         
     @api.multi
     def get_taxes_values(self):
@@ -98,44 +116,44 @@ class AccountInvoice(models.Model):
         if self.fiscal_position_id:
             fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
             fp.ensure_one()
-            tax_ids = self.env['account.tax'].browse([tax.tax_id.id for tax in fp.tax_ids_invoice])
-            
-            price_unit = self.amount_untaxed 
-            taxes = tax_ids.compute_all(price_unit, self.currency_id, partner=self.partner_id)['taxes']
 
-            tax_ids = [base_tax.tax_id.id for base_tax in fp.tax_ids_invoice]
-            base_taxes = self.env['account.base.tax'].search_read([('start_date','<=',self.date_invoice),
-                                                                   ('end_date','>=',self.date_invoice),
-                                                                   ('tax_id','in',tax_ids)], ['amount'])
+            type_tax = 'sale' if self.type in ('out_invoice', 'out_refund') else 'purchase'
+            tax_ids = self.env['account.tax'].search([('id','in',[tax.tax_id.id for tax in fp.tax_ids_invoice]),
+                                                      ('type_tax_use','=',type_tax),
+                                                      ('base_taxes','>',0)])
 
-            for tax in taxes:
-                for base in base_taxes: 
-                    if self.amount_without_wh_tax >= base['amount']:
-                        val = {
-                            'invoice_id': self.id,
-                            'name': tax['name'],
-                            'tax_id': tax['id'],
-                            'amount': tax['amount'],
-                            'manual': False,
-                            'sequence': tax['sequence'],
-                            'account_analytic_id': tax['analytic'] or False,
-                            'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                        }
+            tax_ids = [tax.id for tax in tax_ids]
+            base_taxes = self.env['account.base.tax'].search([('start_date','<=',self.date_invoice),
+                                                              ('end_date','>=',self.date_invoice),
+                                                              ('amount', '<=', self.amount_untaxed),
+                                                              ('tax_id','in',tax_ids)])
 
-                        key = tax['id']
+            for base in base_taxes:
+                tax = base.tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                val = {
+                    'invoice_id': self.id,
+                    'name': tax['name'],
+                    'tax_id': tax['id'],
+                    'amount': tax['amount'],
+                    'manual': False,
+                    'sequence': tax['sequence'],
+                    'account_analytic_id': tax['analytic'] or False,
+                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                }
 
-                        if key not in tax_grouped:
-                            tax_grouped[key] = val
-                        else:
-                            tax_grouped[key]['amount'] += val['amount']
+                key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                if key not in tax_grouped:
+                    tax_grouped[key] = val
+                else:
+                    tax_grouped[key]['amount'] += val['amount']
 
         return tax_grouped
 
     @api.onchange('fiscal_position_id','date_invoice')
     def _onchange_fiscal_position_id(self):
         if not self.date_invoice:
-            self.date_invoice = fields.Date.context_today(self)
-            
+            self.date_invoice = fields.Date.context_today(self)            
         self._onchange_invoice_line_ids()
 
 class AccountInvoiceLine(models.Model):

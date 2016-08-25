@@ -16,6 +16,19 @@
                 </field>
             </record>
 
+            <record id="invoice_supplier_form" model="ir.ui.view">
+              <field name="model">account.invoice</field>
+              <field name="inherit_id" ref="account.invoice_supplier_form"  />
+              <field name="arch" type="xml">
+                  <field name="amount_tax" position="after">
+                    <field name="amount_without_wh_tax" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" style="border-top: 1px solid #cacaca;"/>
+                  </field>
+                  <field name="amount_total" position="before">
+                    <field name="wh_taxes" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" />
+                  </field>
+              </field>
+            </record>
+
             <record id="view_tax_form" model="ir.ui.view">
               <field name="model">account.tax</field>
               <field name="inherit_id" ref="account.view_tax_form"/>

@@ -4,7 +4,7 @@
 
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
         <xpath expr="//div[@t-if='o.tax_line_ids']" position="replace">
-            <div class="row" t-if="o.tax_line_ids and not o.at_least_one_tax_group_enabled()">
+            <div class="row" t-if="o.tax_line_ids and o.at_least_one_tax_group_enabled()">
                 <div class="col-xs-6">
                     <table class="table table-condensed">
                         <thead>
@@ -30,17 +30,7 @@
                     </table>
                 </div>
             </div>
-        </xpath>
-
-        <xpath expr="//div/div/table/tr[last()]" position="before">
-            <tr>
-                <td>Retención</td>
-                <td class="text-right">
-                    <span t-field="o.wh_taxes"
-                        t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
-                </td>
-            </tr>
-        </xpath>        
+        </xpath>     
     </template>
 
 </data>
