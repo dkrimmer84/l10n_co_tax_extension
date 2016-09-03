@@ -67,7 +67,7 @@ class AccountInvoice(models.Model):
             self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.id not in (partner_tax_ids + company_tax_ids))
             self.wh_taxes = abs(sum(line.amount for line in self.tax_line_ids if line.tax_id.id in partner_tax_ids))
         else:
-            self.amount_tax = sum(line.amount for line in self.tax_line_ids not in company_tax_ids)
+            self.amount_tax = sum(line.amount for line in self.tax_line_ids if line.tax_id.id not in company_tax_ids)
 
         self.amount_without_wh_tax = self.amount_untaxed + self.amount_tax
         self.amount_total = self.amount_without_wh_tax - self.wh_taxes
