@@ -110,3 +110,44 @@ msgstr "Historial de comunicación del sitio web"
 #: model:ir.model.fields,field_description:l10n_co_tax_extension.field_account_invoice_wh_taxes
 msgid "Withholding Tax"
 msgstr "Retencion a la Fuente"
+
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Sale Invoice"
+msgstr "Factura de Venta"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Purchase Invoice"
+msgstr "Factura de Compra"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Draft Invoices"
+msgstr "Facturas Borrador"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Cancelled Invoice"
+msgstr "Factura Cancelada"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Refund"
+msgstr "Abono"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "Vendor Refund"
+msgstr "Devolución a Proveedor"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.invoice_supplier_form_inherit
+msgid "DIAN Resolution"
+msgstr "Resolución DIAN"
+
+#. module: l10n_co_tax_extension
+#: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
+msgid "DIAN Resolution"
+msgstr "Resolución DIAN"

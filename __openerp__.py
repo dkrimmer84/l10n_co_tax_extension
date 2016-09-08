@@ -23,7 +23,8 @@ Colombia Impuestos:
     ],
     'data': [
         'views/l10n_co_tax_extension.xml',
-        'views/report_invoice.xml'
+        'views/report_invoice.xml',
+        'views/invoice.xml'
     ],
     'installable': True,
 }
