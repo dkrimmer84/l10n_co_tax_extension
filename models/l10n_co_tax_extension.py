@@ -163,11 +163,11 @@ class AccountInvoice(models.Model):
                     'invoice_id': self.id,
                     'name': tax['name'],
                     'tax_id': tax['id'],
-                    'amount': abs(tax['amount']),
+                    'amount': tax['amount'] * -1,
                     'manual': False,
                     'sequence': tax['sequence'],
                     'account_analytic_id': tax['analytic'] or False,
-                    'account_id': self.type in 'out_invoice' and tax['account_id'] or tax['refund_account_id'],
+                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
                 }
 
                 key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
@@ -220,7 +220,7 @@ class AccountInvoice(models.Model):
     def tax_line_move_line_get(self):
         result = super(AccountInvoice, self).tax_line_move_line_get()
 
-        if self.type in 'out_invoice':
+        if self.type in ('out_invoice', 'out_refund'):
             fp = self.env['account.fiscal.position'].search(
                 [('id', '=', self.company_id.partner_id.property_account_position_id.id)])
             fp.ensure_one()
