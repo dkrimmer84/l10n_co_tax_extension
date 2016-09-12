@@ -163,7 +163,7 @@ class AccountInvoice(models.Model):
                     'invoice_id': self.id,
                     'name': tax['name'],
                     'tax_id': tax['id'],
-                    'amount': tax['amount'] * -1,
+                    'amount': tax['amount'],
                     'manual': False,
                     'sequence': tax['sequence'],
                     'account_analytic_id': tax['analytic'] or False,
@@ -189,10 +189,18 @@ class AccountInvoice(models.Model):
                                                       ('base_taxes','>',0)])
 
             tax_ids = [tax.id for tax in tax_ids]
-            base_taxes = self.env['account.base.tax'].search([('start_date','<=',self.date_invoice),
-                                                              ('end_date','>=',self.date_invoice),
-                                                              ('amount', '<=', self.amount_untaxed),
-                                                              ('tax_id','in',tax_ids)])
+
+            base_taxes = []
+            if self.type in ('in_refund', 'out_refund') and self.wh_taxes:
+                base_taxes = self.env['account.base.tax'].search([('start_date', '<=', self.date_invoice),
+                                                                  ('end_date', '>=', self.date_invoice),
+                                                                  # ('amount', '<=', self.amount_untaxed),
+                                                                  ('tax_id', 'in', tax_ids)])
+            else:
+                base_taxes = self.env['account.base.tax'].search([('start_date','<=',self.date_invoice),
+                                                                  ('end_date','>=',self.date_invoice),
+                                                                  ('amount', '<=', self.amount_untaxed),
+                                                                  ('tax_id','in',tax_ids)])
 
             for base in base_taxes:
                 tax = base.tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
@@ -228,8 +236,10 @@ class AccountInvoice(models.Model):
             tax_ids = self.env['account.tax'].search([('id', 'in', [tax.tax_id.id for tax in fp.tax_ids_invoice]),
                                                       ('type_tax_use', '=', 'sale')])
             tax_ids = [tax.id for tax in tax_ids]
+            done_taxes = []
             for tax_line in sorted(self.tax_line_ids, key=lambda x: -x.sequence):
                 if tax_line.tax_id.id in tax_ids:
+                    done_taxes.append(tax_line.tax_id.id)
                     result.append({
                         'invoice_tax_line_id': tax_line.id,
                         'tax_line_id': tax_line.tax_id.id,
