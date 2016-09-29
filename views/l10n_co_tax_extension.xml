@@ -13,6 +13,14 @@
                   <field name="amount_total" position="before">
                     <field name="wh_taxes" attrs="{'invisible':[('fiscal_position_id', '=', False)]}" />
                   </field>
+
+                  <xpath expr="//field[@name='has_outstanding']" position="after">
+                    <div class="alert alert-error" role="alert" style="margin-bottom:0px;" attrs="{'invisible': [('has_outstanding','=',True)]}">
+                      la resolución de autorización de numeración de facturación está próxima a expirar o la numeración autorizada se está agotando. <br />
+                      <bold><a class="alert-link" href="#outstanding" role="button">Por favor informe a la administración</a></bold>
+                    </div>
+                    <!--<field name="has_outstanding" invisible="1"/>-->
+                  </xpath>
                 </field>
             </record>
 
@@ -136,5 +144,6 @@
                 </form>
               </field>
             </record>
+
     </data>
 </openerp>
