@@ -24,6 +24,7 @@ from openerp import api, fields, models
 from openerp.exceptions import UserError, ValidationError
 from openerp.tools.translate import _
 from openerp.tools import float_is_zero, float_compare
+from openerp.addons.base.ir.ir_sequence import _update_nogap
 
 import pprint
 import logging
@@ -47,15 +48,50 @@ class IrSequence(models.Model):
         'remaining_days': 30,
     }
 
+    def _next(self):
+        if not self.use_dian_control:
+            return super(IrSequence, self)._next()
+        seq_dian = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1)
+        return seq_dian._next()
+
+
 
 class IrSequenceDianResolution(models.Model):
     _name = 'ir.sequence.dian_resolution'
     _rec_name = "sequence_id"
+
+
+    def _get_number_next_actual(self):
+        for element in self:
+            element.number_next_actual = element.number_next
+
+    def _set_number_next_actual(self):
+        for record in self:
+            record.write({'number_next': record.number_next_actual or 0})
+
+    @api.depends('number_from')
+    def _get_initial_number(self):
+        for record in self:
+            if not record.number_next:
+                record.number_next = record.number_from
 
     resolution_number = fields.Integer('Resolution number', required=True)
     date_from = fields.Date('From', required=True)
     date_to = fields.Date('To', required=True)
     number_from = fields.Integer('Initial number', required=True)
     number_to = fields.Integer('Final number', required=True)
-    active = fields.Boolean('Active resolution')
+    number_next = fields.Integer('Next Number', compute='_get_initial_number', store=True)
+    number_next_actual = fields.Integer(compute='_get_number_next_actual', inverse='_set_number_next_actual',
+                                 string='Next Number', required=True, default=1, help="Next number of this sequence")
+    active_resolution = fields.Boolean('Active resolution', required=False)
     sequence_id = fields.Many2one("ir.sequence", 'Main Sequence', required=True, ondelete='cascade')
+
+    def _next(self):
+        number_next = _update_nogap(self, 1)
+        return self.sequence_id.get_next_char(number_next)
+
+    @api.model
+    def create(self, values):
+        _logger.info(values)
+        seq = super(IrSequenceDianResolution, self).create(values)
+        return seq

@@ -10,6 +10,12 @@
                 <xpath expr="//form/sheet/notebook/page/group/group[1]" position="inside">
                     <field name="use_dian_control" />
                 </xpath>
+                <!-- <xpath expr="//form/sheet/notebook/page/group/group[2]/field[" -->
+
+                <xpath expr="//field[@name='number_increment']" position="replace">
+                  <field name="number_increment" attrs="{'invisible':[('use_dian_control','=',True)]}"/>
+                </xpath>
+
                 <xpath expr="//form/sheet/notebook/page/group/group[2]" position="inside">
                     <field name="sequence_dian_type" attrs="{'invisible':[('use_dian_control','=',False)]}" />
                     <field name="remaining_numbers" attrs="{'invisible':[('use_dian_control','=',False)]}" />
@@ -22,9 +28,10 @@
                             <field name="resolution_number" />
                             <field name="number_from" />
                             <field name="number_to" />
+                            <field name="number_next" attrs="{'readonly': True}" />
                             <field name="date_from" />
                             <field name="date_to" />
-                            <field name="active" />
+                            <field name="active_resolution" />
                         </tree>
                     </field>
                 </xpath>
