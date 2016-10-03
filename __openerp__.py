@@ -3,7 +3,7 @@
     'name': 'Colombia - Impuestos',
     'category': 'Localization',
     'version': '0.1',
-    'author': 'Jorge Torres V., Dominic Krimmer, Plastinorte S.A.S',
+    'author': 'Luis Alfredo da Silva, Dominic Krimmer, Plastinorte S.A.S',
     'license': 'AGPL-3',
     'maintainer': 'dominic.krimmer@gmail.com',
     'website': 'https://www.plastinorte.com',
@@ -23,7 +23,8 @@ Colombia Impuestos:
     ],
     'data': [
         'views/l10n_co_tax_extension.xml',
-        'views/report_invoice.xml'
+        'views/report_invoice.xml',
+        'views/ir_sequence_view.xml'
     ],
     'installable': True,
 }
