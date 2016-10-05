@@ -24,6 +24,7 @@ import pprint
 from openerp.exceptions import UserError, ValidationError
 from openerp.tools.translate import _
 from openerp.tools import float_is_zero, float_compare
+from datetime import datetime
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -36,6 +37,23 @@ class AccountInvoice(models.Model):
     _name = 'account.invoice'
     _inherit = 'account.invoice'
 
+    @api.one
+    def _get_has_valid_dian_info_JSON(self):
+        if self.journal_id.sequence_id.use_dian_control:
+            remaining_numbers = self.journal_id.sequence_id.remaining_numbers
+            remaining_days = self.journal_id.sequence_id.remaining_days
+            dian_resolution = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)],limit=1)
+            date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
+            today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
+            days = (date_to - today).days
+
+            if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers:
+                self.not_has_valid_dian = True
+
+            if days < remaining_days:
+                self.not_has_valid_dian = True
+            _logger.info(days)
+
     # Define withholding as new tax.
     wh_taxes = fields.Monetary('Withholding Tax', store="True",
                                compute="_compute_amount")
@@ -43,6 +61,8 @@ class AccountInvoice(models.Model):
     amount_without_wh_tax = fields.Monetary('Total With Tax', store="True",
                                             compute="_compute_amount")
     date_invoice = fields.Date(required=True)
+
+    not_has_valid_dian = fields.Boolean(compute='_get_has_valid_dian_info_JSON')
     # Calculate withholding tax and (new) total amount
 
     @api.one
@@ -356,3 +376,17 @@ class AccountFiscalPosition(models.Model):
 
     tax_ids_invoice = fields.One2many('account.fiscal.position.base.tax', 'position_id',
         string='Taxes that refer to the fiscal position')
+
+class AccountJournal(models.Model):
+    _name = "account.journal"
+    _inherit = "account.journal"
+
+    @api.model
+    def create(self, vals):
+        _logger.info(vals)
+        return super(AccountJournal, self).create(vals)
+
+    @api.model
+    def _create_sequence(self, vals, refund=False):
+        _logger.info(vals)
+        return super(AccountJournal, self)._create_sequence(vals, refund)
