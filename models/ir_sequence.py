@@ -39,8 +39,9 @@ class IrSequence(models.Model):
     remaining_numbers = fields.Integer(default=1, help='Remaining numbers')
     remaining_days = fields.Integer(default=1, help='Remaining days')
     sequence_dian_type = fields.Selection([
-                        ('invoice_computer_generated', 'Invoice generated from computer')],
-                        'Type', required=True, default='invoice_computer_generated')
+        ('invoice_computer_generated', 'Invoice generated from computer'),
+        ('pos_invoice', 'POS Invoice')],
+        'Type', required=True, default='invoice_computer_generated')
     dian_resolution_ids = fields.One2many('ir.sequence.dian_resolution', 'sequence_id', 'DIAN Resolutions')
 
     _defaults = {
@@ -51,15 +52,22 @@ class IrSequence(models.Model):
     def _next(self):
         if not self.use_dian_control:
             return super(IrSequence, self)._next()
-        seq_dian = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1)
-        return seq_dian._next()
 
+        seq_dian_actual = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1)
+        if seq_dian_actual.exists(): 
+            number_actual = seq_dian_actual._next()
+            if number_actual > seq_dian_actual['number_to']:
+                seq_dian_next = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1, offset=1)
+                if seq_dian_next.exists():
+                    seq_dian_actual.active_resolution = False
+                    return seq_dian_next._next()
+            return number_actual
+        return super(IrSequence, self)._next()
 
 
 class IrSequenceDianResolution(models.Model):
     _name = 'ir.sequence.dian_resolution'
     _rec_name = "sequence_id"
-
 
     def _get_number_next_actual(self):
         for element in self:

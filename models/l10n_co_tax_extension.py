@@ -43,16 +43,18 @@ class AccountInvoice(models.Model):
             remaining_numbers = self.journal_id.sequence_id.remaining_numbers
             remaining_days = self.journal_id.sequence_id.remaining_days
             dian_resolution = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)],limit=1)
-            date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
-            today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
-            days = (date_to - today).days
 
-            if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers:
-                self.not_has_valid_dian = True
+            if len(dian_resolution) > 0:
+                date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
+                today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
+                days = (date_to - today).days
 
-            if days < remaining_days:
-                self.not_has_valid_dian = True
-            _logger.info(days)
+                if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers:
+                    self.not_has_valid_dian = True
+
+                if days < remaining_days:
+                    self.not_has_valid_dian = True
+                    _logger.info(days)
 
     # Define withholding as new tax.
     wh_taxes = fields.Monetary('Withholding Tax', store="True",
