@@ -51,15 +51,20 @@ class IrSequence(models.Model):
     def _next(self):
         if not self.use_dian_control:
             return super(IrSequence, self)._next()
-        seq_dian = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1)
-        return seq_dian._next()
 
+        seq_dian_actual = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1)
+        number_actual = seq_dian_actual._next()
+        if number_actual > seq_dian_actual['number_to']:
+            seq_dian_next = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.id),('active_resolution','=',True)], limit=1, offset=1)
+            if seq_dian_next.exists():
+                seq_dian_actual.active_resolution = False
+                return seq_dian_next._next()
+        return number_actual
 
 
 class IrSequenceDianResolution(models.Model):
     _name = 'ir.sequence.dian_resolution'
     _rec_name = "sequence_id"
-
 
     def _get_number_next_actual(self):
         for element in self:
