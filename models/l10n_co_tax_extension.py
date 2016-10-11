@@ -42,19 +42,26 @@ class AccountInvoice(models.Model):
         if self.journal_id.sequence_id.use_dian_control:
             remaining_numbers = self.journal_id.sequence_id.remaining_numbers
             remaining_days = self.journal_id.sequence_id.remaining_days
-            dian_resolution = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)],limit=1)
+            dian_resolution = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)])
+            today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
 
-            if len(dian_resolution) > 0:
+            not_valid = False
+            spent = False
+            if len(dian_resolution) == 1:
+                dian_resolution.ensure_one()
                 date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
-                today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
                 days = (date_to - today).days
 
-                if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers:
-                    self.not_has_valid_dian = True
+                if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers and days > remaining_days:
+                    not_valid = True
 
-                if days < remaining_days:
-                    self.not_has_valid_dian = True
-                    _logger.info(days)
+                if dian_resolution['number_next'] > dian_resolution['number_to']:
+                    spent = True
+
+            if spent:
+                pass # This is when the resolution it's spent and we keep generating numbers
+
+            self.not_has_valid_dian = not_valid
 
     # Define withholding as new tax.
     wh_taxes = fields.Monetary('Withholding Tax', store="True",
