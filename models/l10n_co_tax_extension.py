@@ -47,7 +47,7 @@ class AccountInvoice(models.Model):
 
             not_valid = False
             spent = False
-            if len(dian_resolution) == 1:
+            if len(dian_resolution) == 1 and self.state == 'draft':
                 dian_resolution.ensure_one()
                 date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
                 days = (date_to - today).days

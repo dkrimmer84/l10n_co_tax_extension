@@ -15,8 +15,8 @@
                   </field>
 
                   <xpath expr="//field[@name='has_outstanding']" position="after">
-                    <div class="alert alert-error" role="alert" style="margin-bottom:0px; background-color:red" attrs="{'invisible': [('not_has_valid_dian','=',False)]}">
-                      la resolución de autorización de numeración de facturación está próxima a expirar o la numeración autorizada se está agotando. <br />
+                    <div class="alert alert-error" role="alert" style="margin-bottom:0px; background-color:#ff5555;" attrs="{'invisible': [('not_has_valid_dian','=',False)]}">
+                      La resolución de autorización de numeración de facturación está próxima a expirar o la numeración autorizada se está agotando. <br />
                       <bold><a class="alert-link" href="#outstanding" role="button">Por favor informe a la administración</a></bold>
                     </div>
                     <field name="not_has_valid_dian" invisible="1"/>
