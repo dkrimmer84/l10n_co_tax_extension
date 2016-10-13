@@ -3,7 +3,18 @@
 <data>
 
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[@t-if='o.tax_line_ids']" position="replace">
+
+      <xpath expr="//div[@class='row mt32 mb32']" position="before">
+          <t t-foreach="o.journal_id.sequence_id.dian_resolution_ids[0]" t-as="l">
+            <strong>Fecha de resolución:</strong>
+            <p t-field="l.date_from" />
+            <strong>Número de resolución:</strong>
+            <p t-field="l.resolution_number" />
+            <strong>Resolución válida desde </strong><p t-field="l.number_from" /><strong>hasta </strong><p t-field="l.number_to" />
+          </t>
+      </xpath>
+
+      <xpath expr="//div[@t-if='o.tax_line_ids']" position="replace">
             <div class="row" t-if="o.tax_line_ids and o.at_least_one_tax_group_enabled()">
                 <div class="col-xs-6">
                     <table class="table table-condensed">
@@ -30,7 +41,8 @@
                     </table>
                 </div>
             </div>
-        </xpath>     
+        </xpath>
+
     </template>
 
 </data>
