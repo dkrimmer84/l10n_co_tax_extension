@@ -24,7 +24,7 @@
             <p t-field="l.date_from" />
             <strong>Número de resolución:</strong>
             <p t-field="l.resolution_number" />
-            <strong>Resolución válida desde </strong><p t-field="l.number_from" /><strong>hasta </strong><p t-field="l.number_to" />
+            <strong>Resolución válida desde</strong> <span t-field="l.number_from" /> <strong>hasta</strong> <span t-field="l.number_to" />
           </t>
         </t>
       </xpath>
