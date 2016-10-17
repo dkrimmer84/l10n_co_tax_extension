@@ -19,13 +19,11 @@
       
       <xpath expr="//div[@class='row mt32 mb32']" position="before">
         <t t-if="o.journal_id.sequence_id.use_dian_control">
-          <t t-foreach="o.journal_id.sequence_id.dian_resolution_ids[0]" t-as="l">
             <strong>Fecha de resolución:</strong>
-            <p t-field="l.date_from" />
+            <p t-field="o.resolution_date" />
             <strong>Número de resolución:</strong>
-            <p t-field="l.resolution_number" />
-            <strong>Resolución válida desde</strong> <span t-field="l.number_from" /> <strong>hasta</strong> <span t-field="l.number_to" />
-          </t>
+            <p t-field="o.resolution_number" />
+            <strong>Resolución válida desde</strong> <span t-field="o.resolution_number_from" /> <strong>hasta</strong> <span t-field="o.resolution_number_to" />
         </t>
       </xpath>
 

@@ -72,6 +72,12 @@ class AccountInvoice(models.Model):
     date_invoice = fields.Date(required=True)
 
     not_has_valid_dian = fields.Boolean(compute='_get_has_valid_dian_info_JSON')
+
+    resolution_number = fields.Char('Resolution number in invoice')
+    resolution_date = fields.Date()
+    resolution_number_from = fields.Integer("")
+    resolution_number_to = fields.Integer("")
+
     # Calculate withholding tax and (new) total amount
 
     @api.one
@@ -289,6 +295,18 @@ class AccountInvoice(models.Model):
         if not self.date_invoice:
             self.date_invoice = fields.Date.context_today(self)
         self._onchange_invoice_line_ids()
+
+    @api.multi
+    def action_move_create(self):
+        result = super(AccountInvoice, self).action_move_create()
+
+        for inv in self:
+            sequence = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)], limit=1)
+            inv.resolution_number = sequence['resolution_number']
+            inv.resolution_date = sequence['date_from']
+            inv.resolution_number_from = sequence['number_from']
+            inv.resolution_number_to = sequence['number_to']
+        return result
 
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
