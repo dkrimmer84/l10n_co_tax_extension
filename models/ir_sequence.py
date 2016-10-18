@@ -91,7 +91,7 @@ class IrSequenceDianResolution(models.Model):
     number_next = fields.Integer('Next Number', compute='_get_initial_number', store=True)
     number_next_actual = fields.Integer(compute='_get_number_next_actual', inverse='_set_number_next_actual',
                                  string='Next Number', required=True, default=1, help="Next number of this sequence")
-    active_resolution = fields.Boolean('Active resolution', required=False)
+    active_resolution = fields.Boolean('Active resolution', required=False, default=True)
     sequence_id = fields.Many2one("ir.sequence", 'Main Sequence', required=True, ondelete='cascade')
 
     def _next(self):

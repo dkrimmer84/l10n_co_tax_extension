@@ -3,7 +3,31 @@
 <data>
 
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[@t-if='o.tax_line_ids']" position="replace">
+
+      <xpath expr="//div/h2/span[1]" position="replace">
+        <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
+      </xpath>
+      <xpath expr="//div/h2/span[5]" position="replace">
+        <span t-if="o.type == 'out_refund'">Refund</span>
+      </xpath>
+      <xpath expr="//div/h2/span[6]" position="replace">
+        <span t-if="o.type == 'in_refund'">Vendor Refund</span>
+      </xpath>
+      <xpath expr="//div/h2/span[7]" position="replace">
+        <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
+      </xpath>
+      
+      <xpath expr="//div[@class='row mt32 mb32']" position="before">
+        <t t-if="o.journal_id.sequence_id.use_dian_control">
+            <strong>Fecha de resolución:</strong>
+            <p t-field="o.resolution_date" />
+            <strong>Número de resolución:</strong>
+            <p t-field="o.resolution_number" />
+            <strong>Resolución válida desde</strong> <span t-field="o.resolution_number_from" /> <strong>hasta</strong> <span t-field="o.resolution_number_to" />
+        </t>
+      </xpath>
+
+      <xpath expr="//div[@t-if='o.tax_line_ids']" position="replace">
             <div class="row" t-if="o.tax_line_ids and o.at_least_one_tax_group_enabled()">
                 <div class="col-xs-6">
                     <table class="table table-condensed">
@@ -18,8 +42,8 @@
                             <tr t-foreach="o.tax_line_ids" t-as="t">
                                 <td><span t-field="t.name"/></td>
                                 <td class="text-right">
-                                    <!--<span t-field="t.base"
-                                        t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>-->
+                                    <span t-field="t.base"
+                                        t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
                                 </td>
                                 <td class="text-right">
                                     <span t-field="t.amount"
@@ -30,7 +54,8 @@
                     </table>
                 </div>
             </div>
-        </xpath>     
+        </xpath>
+
     </template>
 
 </data>
