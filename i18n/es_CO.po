@@ -156,7 +156,7 @@ msgstr "Número inicial"
 #: model:ir.model,name:l10n_co_tax_extension.model_account_invoice
 #: model:ir.ui.view,arch_db:l10n_co_tax_extension.report_invoice_document_inherit
 msgid "Invoice"
-msgstr "Factura de venta"
+msgstr "Factura de Venta"
 
 #. module: l10n_co_tax_extension
 #: model:ir.model,name:l10n_co_tax_extension.model_account_invoice_line
