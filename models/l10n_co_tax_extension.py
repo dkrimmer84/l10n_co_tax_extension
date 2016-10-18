@@ -52,7 +52,7 @@ class AccountInvoice(models.Model):
                 date_to = datetime.strptime(dian_resolution['date_to'], '%Y-%m-%d')
                 days = (date_to - today).days
 
-                if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers and days > remaining_days:
+                if dian_resolution['number_to'] - dian_resolution['number_next'] < remaining_numbers or days < remaining_days:
                     not_valid = True
 
                 if dian_resolution['number_next'] > dian_resolution['number_to']:
@@ -60,7 +60,6 @@ class AccountInvoice(models.Model):
 
             if spent:
                 pass # This is when the resolution it's spent and we keep generating numbers
-
             self.not_has_valid_dian = not_valid
 
     # Define withholding as new tax.
