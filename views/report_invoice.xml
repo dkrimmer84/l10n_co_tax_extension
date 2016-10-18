@@ -19,11 +19,16 @@
       
       <xpath expr="//div[@class='row mt32 mb32']" position="before">
         <t t-if="o.journal_id.sequence_id.use_dian_control">
-            <strong>Fecha de resolución:</strong>
-            <p t-field="o.resolution_date" />
-            <strong>Número de resolución:</strong>
-            <p t-field="o.resolution_number" />
-            <strong>Resolución válida desde</strong> <span t-field="o.resolution_number_from" /> <strong>hasta</strong> <span t-field="o.resolution_number_to" />
+
+             <div class="row mt32 mb32" style="font-size:12px; margin-top:10px! important;">
+                 <div style="color: #9a9a9a; margin-left: 17px;" >
+                     Número Resolución DIAN:
+                     <span t-field="o.resolution_number" /> de <span t-field="o.resolution_date" /> |
+                     Rango de Facturación: <span t-field="o.resolution_number_from" /> - <span t-field="o.resolution_number_to" />
+                </div>
+
+            </div>
+
         </t>
       </xpath>
 
