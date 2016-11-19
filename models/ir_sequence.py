@@ -83,7 +83,7 @@ class IrSequenceDianResolution(models.Model):
             if not record.number_next:
                 record.number_next = record.number_from
 
-    resolution_number = fields.Integer('Resolution number', required=True)
+    resolution_number = fields.Char('Resolution number', required=True)
     date_from = fields.Date('From', required=True)
     date_to = fields.Date('To', required=True)
     number_from = fields.Integer('Initial number', required=True)
