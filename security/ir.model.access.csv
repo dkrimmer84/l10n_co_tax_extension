@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_sequence_dian_resolution,ir_sequence_dian_resolution,model_ir_sequence_dian_resolution,base.group_user,1,1,0,0
 access_account_fiscal_position_base_tax,account.fiscal.position.base.tax,model_account_fiscal_position_base_tax,base.group_user,1,1,0,0
+access_pos_order_line_company_tax,pos.order.line.company_tax,model_pos_order_line_company_tax,point_of_sale.group_pos_user,1,1,1,1
