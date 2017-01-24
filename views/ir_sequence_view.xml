@@ -28,7 +28,7 @@
                             <field name="resolution_number" />
                             <field name="number_from" />
                             <field name="number_to" />
-                            <field name="number_next" attrs="{'readonly': True}" />
+                            <field name="number_next" />
                             <field name="date_from" />
                             <field name="date_to" />
                             <field name="active_resolution" />
