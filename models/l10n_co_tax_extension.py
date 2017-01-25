@@ -268,25 +268,29 @@ class AccountInvoice(models.Model):
             fp.ensure_one()
 
             tax_ids = self.env['account.tax'].search([('id', 'in', [tax.tax_id.id for tax in fp.tax_ids_invoice]),
-                                                      ('type_tax_use', '=', 'sale')])
+                                                      ('type_tax_use', '=', 'sale'),
+                                                      ('dont_impact_balance','=',True)])
             tax_ids = [tax.id for tax in tax_ids]
             done_taxes = []
             for tax_line in sorted(self.tax_line_ids, key=lambda x: -x.sequence):
                 if tax_line.tax_id.id in tax_ids:
-                    done_taxes.append(tax_line.tax_id.id)
-                    result.append({
-                        'invoice_tax_line_id': tax_line.id,
-                        'tax_line_id': tax_line.tax_id.id,
-                        'type': 'tax',
-                        'name': tax_line.name,
-                        'price_unit': tax_line.amount,
-                        'quantity': 1,
-                        'price': tax_line.amount * -1,
-                        'account_id': tax_line.tax_id.account_id_counterpart.id,
-                        'account_analytic_id': tax_line.account_analytic_id.id,
-                        'invoice_id': self.id,
-                        'tax_ids': [(6, 0, done_taxes)] if tax_line.tax_id.include_base_amount else []
-                    })
+                    if tax_line.tax_id.account_id_counterpart and tax_line.tax_id.refund_account_id_counterpart:
+                        done_taxes.append(tax_line.tax_id.id)
+                        result.append({
+                            'invoice_tax_line_id': tax_line.id,
+                            'tax_line_id': tax_line.tax_id.id,
+                            'type': 'tax',
+                            'name': tax_line.name,
+                            'price_unit': tax_line.amount,
+                            'quantity': 1,
+                            'price': tax_line.amount * -1,
+                            'account_id': tax_line.tax_id.account_id_counterpart.id,
+                            'account_analytic_id': tax_line.account_analytic_id.id,
+                            'invoice_id': self.id,
+                            'tax_ids': [(6, 0, done_taxes)] if tax_line.tax_id.include_base_amount else []
+                        })
+                    else:
+                        raise UserError(_('You have not a counterpart account on one of your company taxes'))
         return result
 
     @api.onchange('fiscal_position_id','date_invoice')
