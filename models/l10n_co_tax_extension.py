@@ -184,9 +184,9 @@ class AccountInvoice(models.Model):
     def get_taxes_values(self):
         tax_grouped = super(AccountInvoice, self).get_taxes_values()
 
-        if self.company_id.partner_id.property_account_position_id:
+        if self.env.user.company_id.partner_id.property_account_position_id:
             fp = self.env['account.fiscal.position'].search(
-                [('id', '=', self.company_id.partner_id.property_account_position_id.id)])
+                [('id', '=', self.env.user.company_id.partner_id.property_account_position_id.id)])
             fp.ensure_one()
 
             tax_ids = self.env['account.tax'].search([('id', 'in', [tax.tax_id.id for tax in fp.tax_ids_invoice]),
