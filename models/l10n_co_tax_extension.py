@@ -77,7 +77,7 @@ class AccountInvoice(models.Model):
     resolution_number_from = fields.Integer("")
     resolution_number_to = fields.Integer("")
 
-    # Calculate withholding tax and (new) total amount
+    # Calculate withholding tax and (new) total amount 
 
     @api.one
     @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
