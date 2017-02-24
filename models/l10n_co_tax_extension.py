@@ -141,14 +141,23 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def _get_tax_amount_by_group(self):
-        res = super(AccountInvoice, self)._get_tax_amount_by_group()
+        self.ensure_one()
+        res = {}
+        currency = self.currency_id or self.company_id.currency_id
+        for line in self.tax_line_ids:
+            if not line.tax_id.dont_impact_balance:
+                res.setdefault(line.tax_id.tax_group_id, 0.0)
+                res[line.tax_id.tax_group_id] += line.amount
+            
+        res = sorted(res.items(), key=lambda l: l[0].sequence)
+        res = map(lambda l: (l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
+
         groups_not_in_invoice = self.env['account.tax.group'].search_read([('not_in_invoice','=',True)],['name'])
 
         for g in groups_not_in_invoice:
             for i in res:
                 if g['name'] == i[0]:
                     res.remove(i)
-
         return res
 
     def at_least_one_tax_group_enabled(self):
