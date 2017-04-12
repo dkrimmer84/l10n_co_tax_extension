@@ -26,6 +26,7 @@ from openerp.tools.translate import _
 from openerp.tools import float_is_zero, float_compare
 from openerp.addons.base.ir.ir_sequence import _update_nogap
 from datetime import datetime, timedelta, date
+from openerp.exceptions import ValidationError
 
 import pprint
 import logging
@@ -51,25 +52,50 @@ class IrSequence(models.Model):
     }
 
     @api.model
-    def check_active_resolution(self):
-
-        dian_resolutions_sequences_ids = self.search([])
+    def check_active_resolution(self, sequence_id):    
+        
+        dian_resolutions_sequences_ids = self.search([('use_dian_control', '=', True),('id', '=', sequence_id)])
 
         for record in dian_resolutions_sequences_ids:
             if record:
+
+                if len( record.dian_resolution_ids ) > 1:
+                    actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    for resolution in record.dian_resolution_ids:
+
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to:
+                            self.check_active_resolution_cron()
+                            return True
+
+        return False
+
+    @api.model
+    def check_active_resolution_cron(self):
+
+        dian_resolutions_sequences_ids = self.search([('use_dian_control', '=', True)])
+
+
+        for record in dian_resolutions_sequences_ids:
+            if record:
+
                 if len( record.dian_resolution_ids ) > 1:
                     actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     _active_resolution = False
 
+                   
                     for resolution in record.dian_resolution_ids:
+
                         if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to and resolution.active_resolution:
-                            return True
+                            continue
+                            continue
 
                     _active_resolution = False
                                                    
                     for resolution in record.dian_resolution_ids:
                         if _active_resolution:
-                            return True
+                            continue
+                            continue
 
                         if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to:
                             record.dian_resolution_ids.write({
@@ -98,6 +124,22 @@ class IrSequence(models.Model):
                     return seq_dian_next._next()
             return number_actual
         return super(IrSequence, self)._next()
+
+    @api.constrains('dian_resolution_ids')   
+    def val_active_resolution(self):  
+
+        _active_resolution = 0
+
+        if self.use_dian_control:
+
+            for record in self.dian_resolution_ids:
+                if record.active_resolution:
+                    _active_resolution += 1
+
+            if _active_resolution > 1 or _active_resolution == 0:
+                _logger.info("Entraaaa")
+
+                raise ValidationError( _('The system needs at least one active dian resolution') )
 
 
 class IrSequenceDianResolution(models.Model):
