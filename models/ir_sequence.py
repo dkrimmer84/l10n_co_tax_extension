@@ -136,10 +136,14 @@ class IrSequence(models.Model):
                 if record.active_resolution:
                     _active_resolution += 1
 
-            if _active_resolution > 1 or _active_resolution == 0:
-                _logger.info("Entraaaa")
+            if _active_resolution > 1:
+                raise ValidationError( _('The system needs only one active DIAN resolution') )
 
-                raise ValidationError( _('The system needs at least one active dian resolution') )
+            if _active_resolution == 0:
+                raise ValidationError( _('The system needs at least one active DIAN resolution') )
+                 
+
+                
 
 
 class IrSequenceDianResolution(models.Model):
