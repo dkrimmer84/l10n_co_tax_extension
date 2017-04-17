@@ -25,6 +25,8 @@ from openerp.exceptions import UserError, ValidationError
 from openerp.tools.translate import _
 from openerp.tools import float_is_zero, float_compare
 from openerp.addons.base.ir.ir_sequence import _update_nogap
+from datetime import datetime, timedelta, date
+from openerp.exceptions import ValidationError
 
 import pprint
 import logging
@@ -49,6 +51,65 @@ class IrSequence(models.Model):
         'remaining_days': 30,
     }
 
+    @api.model
+    def check_active_resolution(self, sequence_id):    
+        
+        dian_resolutions_sequences_ids = self.search([('use_dian_control', '=', True),('id', '=', sequence_id)])
+
+        for record in dian_resolutions_sequences_ids:
+            if record:
+
+                if len( record.dian_resolution_ids ) > 1:
+                    actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                    for resolution in record.dian_resolution_ids:
+
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to:
+                            self.check_active_resolution_cron()
+                            return True
+
+        return False
+
+    @api.model
+    def check_active_resolution_cron(self):
+
+        dian_resolutions_sequences_ids = self.search([('use_dian_control', '=', True)])
+
+
+        for record in dian_resolutions_sequences_ids:
+            if record:
+
+                if len( record.dian_resolution_ids ) > 1:
+                    actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    _active_resolution = False
+
+                   
+                    for resolution in record.dian_resolution_ids:
+
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to and resolution.active_resolution:
+                            continue
+                            continue
+
+                    _active_resolution = False
+                                                   
+                    for resolution in record.dian_resolution_ids:
+                        if _active_resolution:
+                            continue
+                            continue
+
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to:
+                            record.dian_resolution_ids.write({
+                                'active_resolution' : False
+                            })
+
+                            resolution.write({
+                                    'active_resolution' : True        
+                            }) 
+
+                            _active_resolution = True                           
+
+                                  
+
     def _next(self):
         if not self.use_dian_control:
             return super(IrSequence, self)._next()
@@ -63,6 +124,26 @@ class IrSequence(models.Model):
                     return seq_dian_next._next()
             return number_actual
         return super(IrSequence, self)._next()
+
+    @api.constrains('dian_resolution_ids')   
+    def val_active_resolution(self):  
+
+        _active_resolution = 0
+
+        if self.use_dian_control:
+
+            for record in self.dian_resolution_ids:
+                if record.active_resolution:
+                    _active_resolution += 1
+
+            if _active_resolution > 1:
+                raise ValidationError( _('The system needs only one active DIAN resolution') )
+
+            if _active_resolution == 0:
+                raise ValidationError( _('The system needs at least one active DIAN resolution') )
+                 
+
+                
 
 
 class IrSequenceDianResolution(models.Model):
@@ -91,7 +172,7 @@ class IrSequenceDianResolution(models.Model):
     number_next = fields.Integer('Next Number', compute='_get_initial_number', store=True)
     number_next_actual = fields.Integer(compute='_get_number_next_actual', inverse='_set_number_next_actual',
                                  string='Next Number', required=True, default=1, help="Next number of this sequence")
-    active_resolution = fields.Boolean('Active resolution', required=False, default=True)
+    active_resolution = fields.Boolean('Active resolution', required=False)
     sequence_id = fields.Many2one("ir.sequence", 'Main Sequence', required=True, ondelete='cascade')
 
     def _next(self):
