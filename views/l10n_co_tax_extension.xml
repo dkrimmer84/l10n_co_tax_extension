@@ -119,6 +119,7 @@
                       <field name="tax_ids_invoice" widget="one2many_list" nolabel="1">
                         <tree editable="bottom">
                           <field name="tax_id" domain="[('tax_in_invoice','=',True)]" />
+                          <field name="stock_location_ids" widget="many2many_tags"/>
                           <field name="amount" widget="monetary"/>
                         </tree>
                       </field>

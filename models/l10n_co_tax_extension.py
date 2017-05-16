@@ -398,7 +398,7 @@ class AccountFiscalPositionTaxes(models.Model):
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
     tax_id = fields.Many2one('account.tax', string='Tax')
     amount = fields.Float(related='tax_id.amount', store=True, readonly=True)
-
+    stock_location_ids = fields.Many2many('stock.location', 'stock_location_taxes_ids_rel', 'tax_id', 'location_id', 'Stock Location')
     # _sql_constraints = [
     #     ('tax_fiscal_position_uniq', 'unique(position_id, tax_id)', _('Error! cannot have repeated taxes'))
     # ]
@@ -418,6 +418,7 @@ class AccountFiscalPosition(models.Model):
 
     tax_ids_invoice = fields.One2many('account.fiscal.position.base.tax', 'position_id',
         string='Taxes that refer to the fiscal position')
+    
 
 class AccountJournal(models.Model):
     _name = "account.journal"
