@@ -197,7 +197,7 @@ class AccountInvoice(models.Model):
 
         for order in self:
             _view_location_id  = 0
-            sql_orders = "Select * from sale_order where name = '"+ order.origin +"'" 
+            sql_orders = "Select * from sale_order where name = '"+ str(order.origin) +"'" 
             self.env.cr.execute( sql_orders )
             orders = self.env.cr.dictfetchall()
             for orden in orders:
