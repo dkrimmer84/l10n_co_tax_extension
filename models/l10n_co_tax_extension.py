@@ -194,18 +194,7 @@ class AccountInvoice(models.Model):
     @api.multi
     def get_taxes_values(self):
         tax_grouped = super(AccountInvoice, self).get_taxes_values()
-
         for order in self:
-            _view_location_id  = 0
-            sql_orders = "Select * from sale_order where name = '"+ str(order.origin) +"'" 
-            self.env.cr.execute( sql_orders )
-            orders = self.env.cr.dictfetchall()
-            for orden in orders:
-                sql_warehouse = "Select * from stock_warehouse where id = '"+ str(orden.get('warehouse_id')) +"'" 
-                self.env.cr.execute( sql_warehouse )
-                warehouses = self.env.cr.dictfetchall()
-                for warehouse in warehouses:
-                    _view_location_id = warehouse.get('view_location_id')
 
             if order.company_id.partner_id.property_account_position_id:
                 
@@ -214,11 +203,11 @@ class AccountInvoice(models.Model):
                 fp.ensure_one()
                 
                 for taxs in fp.tax_ids_invoice:
-
-                    sql_locations = "Select * from stock_location_taxes_ids_rel slt where tax_id = "+ str(taxs.id)+"" 
-                    self.env.cr.execute( sql_locations )
+                    sql_diarios = "Select * from account_journal_taxes_ids_rel where tax_id = "+ str(taxs.id)+"" 
+                    self.env.cr.execute( sql_diarios )
                     records = self.env.cr.dictfetchall()
                     if not records:
+                    
                         tax_ids = self.env['account.tax'].browse(taxs.tax_id.id)
                         for tax_id in tax_ids:
                             tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
@@ -240,15 +229,11 @@ class AccountInvoice(models.Model):
                                 tax_grouped[key] = val
                             else:
                                 tax_grouped[key]['amount'] += val['amount']
-
-                    for loc in records:
-
-                        sql_stock_loc= "Select * from stock_location where id = "+ str(loc.get('location_id')) +"" 
-                        self.env.cr.execute( sql_stock_loc )
-                        stock_loc = self.env.cr.dictfetchall()
-                        for stockloc in stock_loc:
-                            if stockloc.get('location_id') ==  _view_location_id:
-                                tax_grouped = super(AccountInvoice, self).get_taxes_values()
+                    if records:
+                          
+                        for loc in records:
+                            
+                            if loc.get('journal_id') ==  order.journal_id.id:
                                 ql_tax_id = "Select tax_id from account_fiscal_position_base_tax slt where id = "+ str(loc.get('tax_id'))+"" 
                                 self.env.cr.execute( ql_tax_id )
                                 records_tax = self.env.cr.dictfetchall()
@@ -450,7 +435,7 @@ class AccountFiscalPositionTaxes(models.Model):
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
     tax_id = fields.Many2one('account.tax', string='Tax')
     amount = fields.Float(related='tax_id.amount', store=True, readonly=True)
-    stock_location_ids = fields.Many2many('stock.location', 'stock_location_taxes_ids_rel', 'tax_id', 'location_id', 'Stock Location', domain=[('usage', '=', 'internal')])
+    account_journal_ids = fields.Many2many('account.journal', 'account_journal_taxes_ids_rel', 'tax_id', 'journal_id', 'Journal', domain=[('type', '=', 'sale')])
     # _sql_constraints = [
     #     ('tax_fiscal_position_uniq', 'unique(position_id, tax_id)', _('Error! cannot have repeated taxes'))
     # ]
@@ -478,10 +463,10 @@ class AccountJournal(models.Model):
 
     @api.model
     def create(self, vals):
-        _logger.info(vals)
+        
         return super(AccountJournal, self).create(vals)
 
     @api.model
     def _create_sequence(self, vals, refund=False):
-        _logger.info(vals)
+        
         return super(AccountJournal, self)._create_sequence(vals, refund)
