@@ -194,8 +194,11 @@ class AccountInvoice(models.Model):
     @api.multi
     def get_taxes_values(self):
         tax_grouped = super(AccountInvoice, self).get_taxes_values()
+        
         for order in self:
-
+            tipo_factura = 'sale'
+            if order.type in ('in_invoice', 'in_refund'):
+                tipo_factura = 'purchase'
             if order.company_id.partner_id.property_account_position_id:
                 
                 fp = self.env['account.fiscal.position'].search(
@@ -207,28 +210,28 @@ class AccountInvoice(models.Model):
                     self.env.cr.execute( sql_diarios )
                     records = self.env.cr.dictfetchall()
                     if not records:
-                    
                         tax_ids = self.env['account.tax'].browse(taxs.tax_id.id)
                         for tax_id in tax_ids:
-                            tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                            if tax_id.type_tax_use == tipo_factura:
+                                tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
                             
-                            val = {
-                                'invoice_id': self.id,
-                                'name': tax['name'],
-                                'tax_id': tax['id'],
-                                'amount': tax['amount'],
-                                'manual': False,
-                                'sequence': tax['sequence'],
-                                'account_analytic_id': tax['analytic'] or False,
-                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                            }
+                                val = {
+                                    'invoice_id': self.id,
+                                    'name': tax['name'],
+                                    'tax_id': tax['id'],
+                                    'amount': tax['amount'],
+                                    'manual': False,
+                                    'sequence': tax['sequence'],
+                                    'account_analytic_id': tax['analytic'] or False,
+                                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                }
 
-                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+                                key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
 
-                            if key not in tax_grouped:
-                                tax_grouped[key] = val
-                            else:
-                                tax_grouped[key]['amount'] += val['amount']
+                                if key not in tax_grouped:
+                                    tax_grouped[key] = val
+                                else:
+                                    tax_grouped[key]['amount'] += val['amount']
                     if records:
                           
                         for loc in records:
@@ -240,24 +243,25 @@ class AccountInvoice(models.Model):
                                 fp_tax_ids = [tax.get('tax_id') for tax in records_tax]
                                 tax_ids = self.env['account.tax'].browse(fp_tax_ids)
                                 for tax_id in tax_ids:
-                                    tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                    val = {
-                                        'invoice_id': self.id,
-                                        'name': tax['name'],
-                                        'tax_id': tax['id'],
-                                        'amount': tax['amount'],
-                                        'manual': False,
-                                        'sequence': tax['sequence'],
-                                        'account_analytic_id': tax['analytic'] or False,
-                                        'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                                    }
+                                    if tax_id.type_tax_use == tipo_factura:
+                                        tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                        val = {
+                                            'invoice_id': self.id,
+                                            'name': tax['name'],
+                                            'tax_id': tax['id'],
+                                            'amount': tax['amount'],
+                                            'manual': False,
+                                            'sequence': tax['sequence'],
+                                            'account_analytic_id': tax['analytic'] or False,
+                                            'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                        }
 
-                                    key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+                                        key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
 
-                                    if key not in tax_grouped:
-                                        tax_grouped[key] = val
-                                    else:
-                                        tax_grouped[key]['amount'] += val['amount']
+                                        if key not in tax_grouped:
+                                            tax_grouped[key] = val
+                                        else:
+                                            tax_grouped[key]['amount'] += val['amount']
             else:
                 raise UserError(_('Debe definir una posicion fiscal para el partner asociado a la compañía actual'))
 
