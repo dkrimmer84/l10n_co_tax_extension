@@ -75,6 +75,7 @@ class AccountInvoice(models.Model):
 
     resolution_number = fields.Char('Resolution number in invoice')
     resolution_date = fields.Date()
+    resolution_date_to = fields.Date()
     resolution_number_from = fields.Integer("")
     resolution_number_to = fields.Integer("")
 
@@ -317,6 +318,7 @@ class AccountInvoice(models.Model):
             sequence = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)], limit=1)
             inv.resolution_number = sequence['resolution_number']
             inv.resolution_date = sequence['date_from']
+            inv.resolution_date_to = sequence['date_to']
             inv.resolution_number_from = sequence['number_from']
             inv.resolution_number_to = sequence['number_to']
         return result
