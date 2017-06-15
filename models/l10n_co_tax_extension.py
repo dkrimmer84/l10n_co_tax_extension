@@ -215,11 +215,13 @@ class AccountInvoice(models.Model):
                                 if tax_id.based_tax_group:
                                     base = 0;
                                     for key_tax_grouped in tax_grouped:
+
                                         _tax_ids_invoice = self.env['account.tax'].search([('id', '=', tax_grouped[ key_tax_grouped ].get('tax_id'))])
                                         if _tax_ids_invoice:
                                             for tax_invoice in _tax_ids_invoice:
                                                 if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
                                                     base += tax_grouped[ key_tax_grouped ].get('amount')
+                                
                                     tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
                             
                                     val = {
@@ -271,24 +273,54 @@ class AccountInvoice(models.Model):
                                 for tax_id in tax_ids:
                                     if tax_id.type_tax_use == tipo_factura:
 
-                                        tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                        val = {
-                                            'invoice_id': self.id,
-                                            'name': tax['name'],
-                                            'tax_id': tax['id'],
-                                            'amount': tax['amount'],
-                                            'manual': False,
-                                            'sequence': tax['sequence'],
-                                            'account_analytic_id': tax['analytic'] or False,
-                                            'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                                        }
+                                        if tax_id.based_tax_group:
+                                            base = 0;
+                                            for key_tax_grouped in tax_grouped:
+                                                _tax_ids_invoice = self.env['account.tax'].search([('id', '=', tax_grouped[ key_tax_grouped ].get('tax_id'))])
+                                                if _tax_ids_invoice:
+                                                    for tax_invoice in _tax_ids_invoice:
+                                                        if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
+                                                            base += tax_grouped[ key_tax_grouped ].get('amount')
+                                                tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                    
+                                            val = {
+                                                'invoice_id': self.id,
+                                                'name': tax['name'],
+                                                'tax_id': tax['id'],
+                                                'amount': tax['amount'],
+                                                'manual': False,
+                                                'sequence': tax['sequence'],
+                                                'account_analytic_id': tax['analytic'] or False,
+                                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                            }
 
-                                        key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+                                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
 
-                                        if key not in tax_grouped:
-                                            tax_grouped[key] = val
-                                        else:
-                                            tax_grouped[key]['amount'] += val['amount']
+                                            if key not in tax_grouped:
+                                                tax_grouped[key] = val
+                                            else:
+                                                tax_grouped[key]['amount'] += val['amount']
+
+                                        else:        
+                                            tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                        
+                                            val = {
+                                                'invoice_id': self.id,
+                                                'name': tax['name'],
+                                                'tax_id': tax['id'],
+                                                'amount': tax['amount'],
+                                                'manual': False,
+                                                'sequence': tax['sequence'],
+                                                'account_analytic_id': tax['analytic'] or False,
+                                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                            }
+
+                                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                                            if key not in tax_grouped:
+                                                tax_grouped[key] = val
+                                            else:
+                                                tax_grouped[key]['amount'] += val['amount']
             else:
                 raise UserError(_('Debe definir una posicion fiscal para el partner asociado a la compañía actual'))
             
