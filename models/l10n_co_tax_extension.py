@@ -180,13 +180,13 @@ class AccountInvoice(models.Model):
 
     @api.onchange('payment_term_id', 'date_invoice')
     def _onchange_payment_term_date_invoice(self):
-        #self.date_invoice = fields.Date.context_today(self)
+        self.date_invoice = fields.Date.context_today(self)
         res = super(AccountInvoice, self)._onchange_payment_term_date_invoice()
         return res
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
-        #self.date_invoice = fields.Date.context_today(self)
+        self.date_invoice = fields.Date.context_today(self)
         res = super(AccountInvoice, self)._onchange_partner_id()
         self._onchange_invoice_line_ids()
         return res
