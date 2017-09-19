@@ -34,14 +34,15 @@
       <xpath expr="//div[@class='row mt32 mb32']" position="before">
         <t t-if="o.journal_id.sequence_id.use_dian_control">
 
-             <div class="row mt32 mb32" style="font-size:12px; margin-top:10px! important;">
-                 <div style="color: #9a9a9a; margin-left: 17px;" >
+             <div class="row mt32 mb32" style="font-size:15px; margin-top:10px! important; margin-bottom:0;padding-bottom:0;">
+                 <div style="color: #333333; margin-left: 17px;" >
                      Autorización DIAN número:
                      <span t-field="o.resolution_number" /> <br />
 		     Fecha de Autorización: <span t-field="o.resolution_date" />
 		     <t t-if="o.resolution_date_to"> | Vigencia de Autorización: <span t-field="o.resolution_date_to" /> |</t> 
                      Rango de Facturación: <span t-field="o.resolution_number_from" /> - <span t-field="o.resolution_number_to" />
                 </div>
+		<hr style="padding-top:0; margin-top:5px; padding-bottom:0; margin-bottom:0;" />
 
             </div>
 
