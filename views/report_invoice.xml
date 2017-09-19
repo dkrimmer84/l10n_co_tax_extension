@@ -80,6 +80,17 @@
                 </div>
             </div>
         </xpath>
+	<xpath expr="//t[1]/t[1]/div[1]/p[2]" position="after">
+		<div style="border:0; height:100px; width:100%; margin:auto;padding:50px 0 0 0;">
+
+                <div id="pn-right" style="float:left; width:260px;margin-right:20px;">
+                        <p>________________________________<br />Recibido</p>
+                </div>
+                <div id="pn-right" style="float:left; width:260px;">
+                        <p>________________________________<br />Aceptado</p>
+                </div>
+                 </div>
+	</xpath>
     </template>
 </data>
 </openerp>
