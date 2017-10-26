@@ -104,7 +104,7 @@
 		   <div t-if="i == 16" style="float:left; display:block; padding-top: 135px; width: 100%;">
 		      <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
 			<div t-if="j > 1" style="padding-bottom:15px;">
-               			<h2><span>Página</span> <span t-esc="j"/> de Factura de Venta #  <span t-field="o.number"/></h2>
+               			<h2><span>Página</span> <span t-esc="j"/> de Factura de Venta <span t-field="o.number"/></h2>
             		</div>
                       	<div style="width:62%; display:block; float:left;margin:0;padding:0;">
                             <span>Descripción</span>
@@ -132,7 +132,7 @@
 		   <div t-if="i == 31" style="float:left; display:block; padding-top: 135px; width: 100%;">
                       <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
 			<div t-if="j > 1" style="padding-bottom:15px;">
-                                <h2><span>Página</span> <span t-esc="j"/> de Factura de Venta #  <span t-field="o.number"/></h2>
+                                <h2><span>Página</span> <span t-esc="j"/> de Factura de Venta <span t-field="o.number"/></h2>
                         </div>
                         <div style="width:62%; display:block; float:left;margin:0;padding:0;">
                             <span>Descripción</span>
@@ -187,8 +187,24 @@
 		   <div t-if="i % 15 == 0" style="page-break-after: always;">
 				<t t-set="j" t-value="j+1"/>
     				<strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="i/15"/>
-				de Factura de Venta #  <span t-field="o.number"/></strong>
-		   </div>
+				de Factura de Venta <span t-field="o.number"/></strong><br />
+
+			<div style="display:block; float:left; border:0; height:100px; width:100%; margin:auto;padding:70px 0 0 0;">
+                	  <div id="pn-right" style="float:left; width:195px;margin-right:20px; font-size:13px;">
+                        	<p><strong>Recibido y aceptado por:</strong></p>
+                		</div>
+
+                		<div id="pn-right" style="float:left; width:195px;margin-right:20px;">
+                        		<p style="font-size: 13px;">______________________<br />Firma / Sello</p>
+                		</div>
+                		<div id="pn-right" style="float:left; width:195px;">
+                        		<p style="font-size: 13px;">______________________<br />NIT o C.C.</p>
+                		</div>
+                		<div id="pn-right" style="float:left; width:195px;">
+                        		<p style="font-size: 13px;">______________________<br />Fecha</p>
+                		</div>
+                 	  </div>
+		   	</div>
                    			
 
 	
