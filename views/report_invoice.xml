@@ -101,10 +101,51 @@
 
 		<div t-foreach="o.invoice_line_ids" t-as="l" 
 		     style="font-size:11px;">
-		   <div t-if="i == 16" style="float:left; display:block; padding-top: 135px; width: 100%;">
+
+
+		   <div t-if="i % 16 == 0" style="page-break-after: always;">
+                                <t t-set="j" t-value="j+1"/>
+                                <strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="i/15"/>
+                                <span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">de PRO-FORMA</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'draft'">de Factura de Venta (Borrador)</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">de Factura de Venta (Cancelada)</span>
+                                <span t-if="o.type == 'out_refund'">Reembolso</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">de Factura de Venta (Cancelada)</span>
+                                <span t-if="o.type == 'in_invoice'">de Factura de Compra</span>
+                                <span t-field="o.number"/></strong><br />
+
+                        <div style="display:block; float:left; border:0; height:100px; width:100%; margin:auto;padding:70px 0 0 0;">
+                                <div id="pn-right" style="float:left; width:195px;margin-right:20px; font-size:13px;">
+                                  <p><strong>Recibido y aceptado por:</strong></p>
+                                </div>
+
+                                <div id="pn-right" style="float:left; width:195px;margin-right:20px;">
+                                        <p style="font-size: 13px;">______________________<br />Firma / Sello</p>
+                                </div>
+                                <div id="pn-right" style="float:left; width:195px;">
+                                        <p style="font-size: 13px;">______________________<br />NIT o C.C.</p>
+                                </div>
+                                <div id="pn-right" style="float:left; width:195px;">
+                                        <p style="font-size: 13px;">______________________<br />Fecha</p>
+                                </div>
+                        </div>
+                   </div>
+
+
+
+		   <div t-if="(i-1) % 15 == 0 and j > 1" style="float:left; display:block; padding-top: 135px; width: 100%;">
 		      <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
 			<div t-if="j > 1" style="padding-bottom:15px;">
-               			<h2><span>Página</span> <span t-esc="j"/> de Factura de Venta <span t-field="o.number"/></h2>
+               			<h2><span>Página</span> <span t-esc="j"/> 
+				<span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">de PRO-FORMA</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'draft'">de Factura de Venta (Borrador)</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">de Factura de Venta (Cancelada)</span>
+                                <span t-if="o.type == 'out_refund'">Reembolso</span>
+                                <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">de Factura de Venta (Cancelada)</span>
+                                <span t-if="o.type == 'in_invoice'">de Factura de Compra</span>
+				 <span t-field="o.number"/></h2>
             		</div>
                       	<div style="width:62%; display:block; float:left;margin:0;padding:0;">
                             <span>Descripción</span>
@@ -129,83 +170,31 @@
 		   </div>
 		   
 
-		   <div t-if="i == 31" style="float:left; display:block; padding-top: 135px; width: 100%;">
-                      <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
-			<div t-if="j > 1" style="padding-bottom:15px;">
-                                <h2><span>Página</span> <span t-esc="j"/> de Factura de Venta <span t-field="o.number"/></h2>
-                        </div>
-                        <div style="width:62%; display:block; float:left;margin:0;padding:0;">
-                            <span>Descripción</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                           <span>Cantidad</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                          <span>Precio Unitario</span>
-                        </div>
-                        <div t-if="display_discount" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
-                                <span>Descuento (%)</span>
-                        </div>
-                        <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
-                                <span>Impuestos</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                                <span>Precio</span>
-                        </div>
+
+		   <div style="padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid #DADADA; display:block; float:left;">
+
+                      <div style="width:62%; display:block; float:left;margin:0;padding:0;">
+                            <span t-field="l.name"/>
                       </div>
-
-                   </div>
-
-
-		   <div style="padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid #DADADA; display:block; float:left;">	
-
-		      <div style="width:62%; display:block; float:left;margin:0;padding:0;">
-		   	    <span t-field="l.name"/>
-		      </div>
-		      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-		   	   <span t-field="l.quantity"/> <span t-field="l.uom_id"  groups="product.group_uom"/>
-		      </div>
-		      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-		   	  <span t-field="l.price_unit"/> 
-		      </div>
-			<div t-if="display_discount" groups="sale.group_discount_per_so_line" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
-			<span t-field="l.discount"/>
-		      </div>
-		      <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
-			<span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
-		      </div>
-		      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-			<span t-field="l.price_subtotal" 
+                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                           <span t-field="l.quantity"/> <span t-field="l.uom_id"  groups="product.group_uom"/>
+                      </div>
+                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                          <span t-field="l.price_unit"/>
+                      </div>
+                        <div t-if="display_discount" groups="sale.group_discount_per_so_line" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
+                        <span t-field="l.discount"/>
+                      </div>
+                      <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
+                        <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
+                      </div>
+                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                        <span t-field="l.price_subtotal" 
                                 t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
-		      </div>
+                      </div>
                    </div>
-	
-		   <br />
 
-
-
-		   <div t-if="i % 15 == 0" style="page-break-after: always;">
-				<t t-set="j" t-value="j+1"/>
-    				<strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="i/15"/>
-				de Factura de Venta <span t-field="o.number"/></strong><br />
-
-			<div style="display:block; float:left; border:0; height:100px; width:100%; margin:auto;padding:70px 0 0 0;">
-                	  <div id="pn-right" style="float:left; width:195px;margin-right:20px; font-size:13px;">
-                        	<p><strong>Recibido y aceptado por:</strong></p>
-                		</div>
-
-                		<div id="pn-right" style="float:left; width:195px;margin-right:20px;">
-                        		<p style="font-size: 13px;">______________________<br />Firma / Sello</p>
-                		</div>
-                		<div id="pn-right" style="float:left; width:195px;">
-                        		<p style="font-size: 13px;">______________________<br />NIT o C.C.</p>
-                		</div>
-                		<div id="pn-right" style="float:left; width:195px;">
-                        		<p style="font-size: 13px;">______________________<br />Fecha</p>
-                		</div>
-                 	  </div>
-		   	</div>
-                   			
+                   <br />	
 
 	
 		<t t-set="i" t-value="i+1"/>
