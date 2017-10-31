@@ -42,7 +42,7 @@
                 </div>
                 <hr style="padding-top:0; margin-top:5px; padding-bottom:10px; margin-bottom:0;" />
                 </t>
-
+		<div style="max-height:60px; overflow:hidden;">
                 <div class="col-xs-3" style="font-size:11px;" t-if="o.name">
                     <strong>Observación:</strong>
                     <p t-field="o.name"/>
@@ -67,6 +67,7 @@
                     <strong>Referencia:</strong>
                     <p t-field="o.reference"/>
                 </div>
+		</div>
             </div>
             <hr style="padding-top:0; margin-top:0px; padding-bottom:10px; margin-bottom:0;" />
       </xpath>
@@ -103,9 +104,9 @@
 		     style="font-size:11px;">
 
 
-		   <div t-if="(i-1) % 15 == 0 and i != 1" style="page-break-after: always;">
+		   <div t-if="(i-1) % 13 == 0 and i != 1" style="page-break-after: always;">
+                                <strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="j"/>
                                 <t t-set="j" t-value="j+1"/>
-                                <strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="i/15"/>
                                 <span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
                                 <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">de PRO-FORMA</span>
                                 <span t-if="o.type == 'out_invoice' and o.state == 'draft'">de Factura de Venta (Borrador)</span>
@@ -134,7 +135,7 @@
 
 
 
-		   <div t-if="(i-1) % 15 == 0 and j > 1" style="float:left; display:block; padding-top: 135px; width: 100%;">
+		   <div t-if="(i-1) % 13 == 0 and j > 1" style="float:left; display:block; padding-top: 135px; width: 100%;">
 		      <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
 			<div t-if="j > 1" style="padding-bottom:15px;">
                			<h2><span>Página</span> <span t-esc="j"/> 
@@ -194,7 +195,6 @@
                       </div>
                    </div>
 
-                   <br />	
 
 	
 		<t t-set="i" t-value="i+1"/>
@@ -278,10 +278,15 @@
                  </div>
         </xpath>
 	<xpath expr="//t[1]/t[1]/div[1]/p" position="replace">
-                <p t-if="o.comment">
-                <strong style="font-size:11px;">Información adicional:</strong>
-                <span style="font-size:11px;" t-field="o.comment"/>
-            </p>
+                <p t-if="o.comment or o.team_id">
+                <span t-if="o.comment">
+			<strong style="font-size:11px;">Información adicional:</strong>
+                	<span style="font-size:11px;" t-field="o.comment"/>
+		</span>
+		<span t-if="o.team_id">
+			<span style="font-size:11px; font-weight:bold;">Equipo de Ventas:</span> <span style="font-size:11px;" t-field="o.team_id"/>
+		</span>
+            	</p>
 
         </xpath>
     </template>
