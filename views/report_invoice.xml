@@ -103,7 +103,7 @@
 		     style="font-size:11px;">
 
 
-		   <div t-if="i % 16 == 0" style="page-break-after: always;">
+		   <div t-if="(i-1) % 15 == 0 and i != 1" style="page-break-after: always;">
                                 <t t-set="j" t-value="j+1"/>
                                 <strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="i/15"/>
                                 <span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
