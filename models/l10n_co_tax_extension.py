@@ -178,23 +178,10 @@ class AccountInvoice(models.Model):
 
         return res
 
-    @api.onchange('payment_term_id', 'date_invoice')
-    def _onchange_payment_term_date_invoice(self):
-        self.date_invoice = fields.Date.context_today(self)
-        res = super(AccountInvoice, self)._onchange_payment_term_date_invoice()
-        return res
-
-    @api.onchange('partner_id', 'company_id')
-    def _onchange_partner_id(self):
-        self.date_invoice = fields.Date.context_today(self)
-        res = super(AccountInvoice, self)._onchange_partner_id()
-        self._onchange_invoice_line_ids()
-        return res
 
     @api.multi
     def get_taxes_values(self):
         tax_grouped = super(AccountInvoice, self).get_taxes_values()
-        
         for order in self:
             tipo_factura = 'sale'
             if order.type in ('in_invoice', 'in_refund'):
@@ -213,29 +200,58 @@ class AccountInvoice(models.Model):
                         tax_ids = self.env['account.tax'].browse(taxs.tax_id.id)
                         for tax_id in tax_ids:
                             if tax_id.type_tax_use == tipo_factura:
-                                tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                if tax_id.based_tax_group:
+                                    base = 0;
+                                    for key_tax_grouped in tax_grouped:
+
+                                        _tax_ids_invoice = self.env['account.tax'].search([('id', '=', tax_grouped[ key_tax_grouped ].get('tax_id'))])
+                                        if _tax_ids_invoice:
+                                            for tax_invoice in _tax_ids_invoice:
+                                                if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
+                                                    base += tax_grouped[ key_tax_grouped ].get('amount')
+                                
+                                    tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
                             
-                                val = {
-                                    'invoice_id': self.id,
-                                    'name': tax['name'],
-                                    'tax_id': tax['id'],
-                                    'amount': tax['amount'],
-                                    'manual': False,
-                                    'sequence': tax['sequence'],
-                                    'account_analytic_id': tax['analytic'] or False,
-                                    'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                                }
+                                    val = {
+                                        'invoice_id': self.id,
+                                        'name': tax['name'],
+                                        'tax_id': tax['id'],
+                                        'amount': tax['amount'],
+                                        'manual': False,
+                                        'sequence': tax['sequence'],
+                                        'account_analytic_id': tax['analytic'] or False,
+                                        'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                    }
 
-                                key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+                                    key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
 
-                                if key not in tax_grouped:
-                                    tax_grouped[key] = val
-                                else:
-                                    tax_grouped[key]['amount'] += val['amount']
+                                    if key not in tax_grouped:
+                                        tax_grouped[key] = val
+                                    else:
+                                        tax_grouped[key]['amount'] += val['amount']
+
+                                else:        
+                                    tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                
+                                    val = {
+                                        'invoice_id': self.id,
+                                        'name': tax['name'],
+                                        'tax_id': tax['id'],
+                                        'amount': tax['amount'],
+                                        'manual': False,
+                                        'sequence': tax['sequence'],
+                                        'account_analytic_id': tax['analytic'] or False,
+                                        'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                    }
+
+                                    key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                                    if key not in tax_grouped:
+                                        tax_grouped[key] = val
+                                    else:
+                                        tax_grouped[key]['amount'] += val['amount']
                     if records:
-                          
                         for loc in records:
-                            
                             if loc.get('journal_id') ==  order.journal_id.id:
                                 ql_tax_id = "Select tax_id from account_fiscal_position_base_tax slt where id = "+ str(loc.get('tax_id'))+"" 
                                 self.env.cr.execute( ql_tax_id )
@@ -244,27 +260,58 @@ class AccountInvoice(models.Model):
                                 tax_ids = self.env['account.tax'].browse(fp_tax_ids)
                                 for tax_id in tax_ids:
                                     if tax_id.type_tax_use == tipo_factura:
-                                        tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                        val = {
-                                            'invoice_id': self.id,
-                                            'name': tax['name'],
-                                            'tax_id': tax['id'],
-                                            'amount': tax['amount'],
-                                            'manual': False,
-                                            'sequence': tax['sequence'],
-                                            'account_analytic_id': tax['analytic'] or False,
-                                            'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                                        }
 
-                                        key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+                                        if tax_id.based_tax_group:
+                                            base = 0;
+                                            for key_tax_grouped in tax_grouped:
+                                                _tax_ids_invoice = self.env['account.tax'].search([('id', '=', tax_grouped[ key_tax_grouped ].get('tax_id'))])
+                                                if _tax_ids_invoice:
+                                                    for tax_invoice in _tax_ids_invoice:
+                                                        if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
+                                                            base += tax_grouped[ key_tax_grouped ].get('amount')
+                                            tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                    
+                                            val = {
+                                                'invoice_id': self.id,
+                                                'name': tax['name'],
+                                                'tax_id': tax['id'],
+                                                'amount': tax['amount'],
+                                                'manual': False,
+                                                'sequence': tax['sequence'],
+                                                'account_analytic_id': tax['analytic'] or False,
+                                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                            }
 
-                                        if key not in tax_grouped:
-                                            tax_grouped[key] = val
-                                        else:
-                                            tax_grouped[key]['amount'] += val['amount']
+                                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                                            if key not in tax_grouped:
+                                                tax_grouped[key] = val
+                                            else:
+                                                tax_grouped[key]['amount'] += val['amount']
+
+                                        else:        
+                                            tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                                        
+                                            val = {
+                                                'invoice_id': self.id,
+                                                'name': tax['name'],
+                                                'tax_id': tax['id'],
+                                                'amount': tax['amount'],
+                                                'manual': False,
+                                                'sequence': tax['sequence'],
+                                                'account_analytic_id': tax['analytic'] or False,
+                                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                                            }
+
+                                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                                            if key not in tax_grouped:
+                                                tax_grouped[key] = val
+                                            else:
+                                                tax_grouped[key]['amount'] += val['amount']
             else:
                 raise UserError(_('Debe definir una posicion fiscal para el partner asociado a la compañía actual'))
-
+            
             if self.fiscal_position_id:
                 fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
                 fp.ensure_one()
@@ -274,39 +321,68 @@ class AccountInvoice(models.Model):
                                                           ('type_tax_use','=',type_tax),
                                                           ('base_taxes','>',0)])
 
-                tax_ids = [tax.id for tax in tax_ids]
-
-                base_taxes = []
-                if self.type in ('in_refund', 'out_refund') and self.wh_taxes:
-                    base_taxes = self.env['account.base.tax'].search([('start_date', '<=', self.date_invoice),
-                                                                      ('end_date', '>=', self.date_invoice),
-                                                                      # ('amount', '<=', self.amount_untaxed),
-                                                                      ('tax_id', 'in', tax_ids)])
-                else:
-                    base_taxes = self.env['account.base.tax'].search([('start_date','<=',self.date_invoice),
-                                                                      ('end_date','>=',self.date_invoice),
-                                                                      ('amount', '<=', self.amount_untaxed),
-                                                                      ('tax_id','in',tax_ids)])
-
-                for base in base_taxes:
-                    tax = base.tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                    val = {
-                        'invoice_id': self.id,
-                        'name': tax['name'],
-                        'tax_id': tax['id'],
-                        'amount': tax['amount'],
-                        'manual': False,
-                        'sequence': tax['sequence'],
-                        'account_analytic_id': tax['analytic'] or False,
-                        'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
-                    }
-
-                    key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
-
-                    if key not in tax_grouped:
-                        tax_grouped[key] = val
+                #tax_ids = [tax.id for tax in tax_ids]
+                for tax in tax_ids:
+                    base_taxes = []
+                    if self.type in ('in_refund', 'out_refund') and self.wh_taxes:
+                        base_taxes = self.env['account.base.tax'].search([('start_date', '<=', self.date_invoice),
+                                                                          ('end_date', '>=', self.date_invoice),
+                                                                          # ('amount', '<=', self.amount_untaxed),
+                                                                          ('tax_id', '=', tax.id)])
                     else:
-                        tax_grouped[key]['amount'] += val['amount']
+                        base_taxes = self.env['account.base.tax'].search([('start_date','<=',self.date_invoice),
+                                                                          ('end_date','>=',self.date_invoice),
+                                                                          ('amount', '<=', self.amount_untaxed),
+                                                                          ('tax_id','=',tax.id)])
+
+                    for base in base_taxes:
+                        _logger.info('base.tax_id.based_tax_group')
+                        _logger.info(base.tax_id.based_tax_group)
+                        if base.tax_id.based_tax_group:
+                            _base = 0;
+                            for key_tax_grouped in tax_grouped:
+                                _tax_ids_invoice = self.env['account.tax'].search([('id', '=', tax_grouped[ key_tax_grouped ].get('tax_id'))])
+                                if _tax_ids_invoice:
+                                    for tax_invoice in _tax_ids_invoice:
+                                        if tax_invoice.tax_group_id.id == base.tax_id.tax_group_id_header.id:
+                                            _base += tax_grouped[ key_tax_grouped ].get('amount')
+                            tax = base.tax_id.compute_all(_base, self.currency_id, partner=self.partner_id)['taxes'][0]
+                            val = {
+                                'invoice_id': self.id,
+                                'name': tax['name'],
+                                'tax_id': tax['id'],
+                                'amount': tax['amount'],
+                                'manual': False,
+                                'sequence': tax['sequence'],
+                                'account_analytic_id': tax['analytic'] or False,
+                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                            }
+
+                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                            if key not in tax_grouped:
+                                tax_grouped[key] = val
+                            else:
+                                tax_grouped[key]['amount'] += val['amount']                
+                        else:                    
+                            tax = base.tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
+                            val = {
+                                'invoice_id': self.id,
+                                'name': tax['name'],
+                                'tax_id': tax['id'],
+                                'amount': tax['amount'],
+                                'manual': False,
+                                'sequence': tax['sequence'],
+                                'account_analytic_id': tax['analytic'] or False,
+                                'account_id': self.type in ('out_invoice', 'in_invoice') and tax['account_id'] or tax['refund_account_id'],
+                            }
+
+                            key = self.env['account.tax'].browse(tax['id']).get_grouping_key(val)
+
+                            if key not in tax_grouped:
+                                tax_grouped[key] = val
+                            else:
+                                tax_grouped[key]['amount'] += val['amount']
 
         return tax_grouped
 
@@ -347,8 +423,8 @@ class AccountInvoice(models.Model):
 
     @api.onchange('fiscal_position_id','date_invoice')
     def _onchange_fiscal_position_id(self):
-        if not self.date_invoice:
-            self.date_invoice = fields.Date.context_today(self)
+        #if not self.date_invoice:
+            #self.date_invoice = fields.Date.context_today(self)
         self._onchange_invoice_line_ids()
 
     @api.multi
@@ -374,6 +450,12 @@ class AccountTax(models.Model):
 
     tax_in_invoice = fields.Boolean(string="Evaluate in invoice", default=False,
         help="Check this if you want to hide the tax from the taxes list in products")
+    based_tax_group = fields.Boolean(string="Based on Tax Group", default=False,
+        help="Check this if you want to show the field taxes group list")
+
+    #Grupo de impuestos de encabezado
+    tax_group_id_header = fields.Many2one('account.tax.group', string="Tax Group")
+    
     dont_impact_balance = fields.Boolean(string="Don't impact balance", default=False,
         help="Check this if you want to assign counterpart taxes accounts")
     account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart', ondelete='restrict',
@@ -439,7 +521,7 @@ class AccountFiscalPositionTaxes(models.Model):
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal position related')
     tax_id = fields.Many2one('account.tax', string='Tax')
     amount = fields.Float(related='tax_id.amount', store=True, readonly=True)
-    account_journal_ids = fields.Many2many('account.journal', 'account_journal_taxes_ids_rel', 'tax_id', 'journal_id', 'Journal', domain=[('type', '=', 'sale')])
+    account_journal_ids = fields.Many2many('account.journal', 'account_journal_taxes_ids_rel', 'tax_id', 'journal_id', 'Journal')
     # _sql_constraints = [
     #     ('tax_fiscal_position_uniq', 'unique(position_id, tax_id)', _('Error! cannot have repeated taxes'))
     # ]
