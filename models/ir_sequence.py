@@ -60,11 +60,11 @@ class IrSequence(models.Model):
             if record:
 
                 if len( record.dian_resolution_ids ) > 1:
-                    actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    actual_date = datetime.now().strftime('%Y-%m-%d')
 
                     for resolution in record.dian_resolution_ids:
 
-                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to:
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date >= resolution.date_to:
                             self.check_active_resolution_cron()
                             return True
 
@@ -80,13 +80,13 @@ class IrSequence(models.Model):
             if record:
 
                 if len( record.dian_resolution_ids ) > 1:
-                    actual_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    actual_date = datetime.now().strftime('%Y-%m-%d')
                     _active_resolution = False
 
                    
                     for resolution in record.dian_resolution_ids:
 
-                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date <= resolution.date_to and resolution.active_resolution:
+                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date >= resolution.date_to and resolution.active_resolution:
                             continue
                             continue
 
@@ -103,7 +103,7 @@ class IrSequence(models.Model):
                             })
 
                             resolution.write({
-                                    'active_resolution' : True        
+                                'active_resolution' : True        
                             }) 
 
                             _active_resolution = True                           
