@@ -64,9 +64,11 @@ class IrSequence(models.Model):
 
                     for resolution in record.dian_resolution_ids:
 
-                        if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date >= resolution.date_to:
+                        self.check_active_resolution_cron()
+                        return True
+                        """if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date >= resolution.date_to:
                             self.check_active_resolution_cron()
-                            return True
+                            return True"""
 
         return False
 
