@@ -52,24 +52,13 @@ class IrSequence(models.Model):
     }
 
     @api.model
-    def check_active_resolution(self, sequence_id):    
+    def check_active_resolution(self, sequence_id, dian_resolution_sequence_active):    
+        self.check_active_resolution_cron()
         
-        dian_resolutions_sequences_ids = self.search([('use_dian_control', '=', True),('id', '=', sequence_id)])
+        resolution_sequence = self.env['ir.sequence.dian_resolution'].browse(dian_resolution_sequence_active)
+        if not resolution_sequence.active_resolution:
+            return True
 
-        for record in dian_resolutions_sequences_ids:
-            if record:
-
-                if len( record.dian_resolution_ids ) > 1:
-                    actual_date = datetime.now().strftime('%Y-%m-%d')
-
-                    for resolution in record.dian_resolution_ids:
-
-                        self.check_active_resolution_cron()
-                        return True
-                        
-                        """if resolution.number_next_actual >= resolution.number_from and resolution.number_next_actual <= resolution.number_to and  actual_date >= resolution.date_to:
-                            self.check_active_resolution_cron()
-                            return True"""
 
         return False
 
@@ -111,7 +100,7 @@ class IrSequence(models.Model):
 
                             _active_resolution = True                           
 
-                                  
+        return _active_resolution
 
     def _next(self):
         if not self.use_dian_control:
