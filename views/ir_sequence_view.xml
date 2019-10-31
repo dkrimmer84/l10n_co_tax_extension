@@ -1,42 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
 
-        <record id="sequence_view" model="ir.ui.view">
-            <field name="model">ir.sequence</field>
-            <field name="inherit_id" ref="base.sequence_view" />
-            <field name="arch" type="xml">
+    <record id="sequence_view" model="ir.ui.view">
+        <field name="model">ir.sequence</field>
+        <field name="inherit_id" ref="base.sequence_view" />
+        <field name="arch" type="xml">
 
-                <xpath expr="//form/sheet/notebook/page/group/group[1]" position="inside">
-                    <field name="use_dian_control" />
-                </xpath>
-                <!-- <xpath expr="//form/sheet/notebook/page/group/group[2]/field[" -->
+            <xpath expr="//form/sheet/notebook/page/group/group[1]" position="inside">
+                <field name="use_dian_control" />
+            </xpath>
+            <!-- <xpath expr="//form/sheet/notebook/page/group/group[2]/field[" -->
 
-                <xpath expr="//field[@name='number_increment']" position="replace">
-                  <field name="number_increment" attrs="{'invisible':[('use_dian_control','=',True)]}"/>
-                </xpath>
+            <xpath expr="//field[@name='number_increment']" position="replace">
+              <field name="number_increment" attrs="{'invisible':[('use_dian_control','=',True)]}"/>
+            </xpath>
 
-                <xpath expr="//form/sheet/notebook/page/group/group[2]" position="inside">
-                    <field name="sequence_dian_type" attrs="{'invisible':[('use_dian_control','=',False)]}" />
-                    <field name="remaining_numbers" attrs="{'invisible':[('use_dian_control','=',False)]}" />
-                    <field name="remaining_days" attrs="{'invisible':[('use_dian_control','=',False)]}" />
-                </xpath>
+            <xpath expr="//form/sheet/notebook/page/group/group[2]" position="inside">
+                <field name="sequence_dian_type" attrs="{'invisible':[('use_dian_control','=',False)]}" />
+                <field name="remaining_numbers" attrs="{'invisible':[('use_dian_control','=',False)]}" />
+                <field name="remaining_days" attrs="{'invisible':[('use_dian_control','=',False)]}" />
+            </xpath>
 
-                <xpath expr="//field[@name='date_range_ids']" position="after">
-                    <field name="dian_resolution_ids" attrs="{'invisible':[('use_dian_control','=',False)]}">
-                      <tree string="DIAN Resolutions" editable="top" default_order="id desc">
-                            <field name="resolution_number" />
-                            <field name="number_from" />
-                            <field name="number_to" />
-                            <field name="number_next" attrs="{'readonly': False}" />
-                            <field name="date_from" />
-                            <field name="date_to" />
-                            <field name="active_resolution" />
-                        </tree>
-                    </field>
-                </xpath>
-            </field>
-        </record>
+            <xpath expr="//field[@name='date_range_ids']" position="after">
+                <field name="dian_resolution_ids" attrs="{'invisible':[('use_dian_control','=',False)]}">
+                  <tree string="DIAN Resolutions" editable="top" default_order="id desc">
+                        <field name="resolution_number" />
+                        <field name="number_from" />
+                        <field name="number_to" />
+                        <field name="number_next" attrs="{'readonly': False}" />
+                        <field name="date_from" />
+                        <field name="date_to" />
+                        <field name="active_resolution" />
+                    </tree>
+                </field>
+            </xpath>
+        </field>
+    </record>
 
-    </data>
-</openerp>
+</odoo>

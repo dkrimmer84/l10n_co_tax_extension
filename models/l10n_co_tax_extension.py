@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 ###############################################################################
 #                                                                             #
 # Copyright (C) 2016  Dominic Krimmer                                         #
@@ -18,13 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.       #
 ###############################################################################
 
-from openerp import api, fields, models
+from odoo import api, fields, models
 
 import pprint
-from openerp.exceptions import UserError, ValidationError
-from openerp.tools.translate import _
-from openerp.tools import float_is_zero, float_compare
-from openerp.tools.misc import formatLang
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.translate import _
+from odoo.tools import float_is_zero, float_compare
+from odoo.tools.misc import formatLang
 from datetime import datetime
 
 import logging
@@ -79,7 +78,7 @@ class AccountInvoice(models.Model):
     resolution_number_from = fields.Integer("")
     resolution_number_to = fields.Integer("")
 
-    # Calculate withholding tax and (new) total amount 
+    # Calculate withholding tax and (new) total amount
 
     @api.one
     @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id')
@@ -150,7 +149,7 @@ class AccountInvoice(models.Model):
             if not line.tax_id.dont_impact_balance:
                 res.setdefault(line.tax_id.tax_group_id, 0.0)
                 res[line.tax_id.tax_group_id] += line.amount
-            
+
         res = sorted(res.items(), key=lambda l: l[0].sequence)
         res = map(lambda l: (l[0].name, formatLang(self.env, l[1], currency_obj=currency)), res)
 
@@ -187,13 +186,13 @@ class AccountInvoice(models.Model):
             if order.type in ('in_invoice', 'in_refund'):
                 tipo_factura = 'purchase'
             if order.company_id.partner_id.property_account_position_id:
-                
+
                 fp = self.env['account.fiscal.position'].search(
                     [('id', '=', self.env.user.company_id.partner_id.property_account_position_id.id)])
                 fp.ensure_one()
-                
+
                 for taxs in fp.tax_ids_invoice:
-                    sql_diarios = "Select * from account_journal_taxes_ids_rel where tax_id = "+ str(taxs.id)+"" 
+                    sql_diarios = "Select * from account_journal_taxes_ids_rel where tax_id = "+ str(taxs.id)+""
                     self.env.cr.execute( sql_diarios )
                     records = self.env.cr.dictfetchall()
                     if not records:
@@ -209,9 +208,9 @@ class AccountInvoice(models.Model):
                                             for tax_invoice in _tax_ids_invoice:
                                                 if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
                                                     base += tax_grouped[ key_tax_grouped ].get('amount')
-                                
+
                                     tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
-                            
+
                                     val = {
                                         'invoice_id': self.id,
                                         'name': tax['name'],
@@ -230,9 +229,9 @@ class AccountInvoice(models.Model):
                                     else:
                                         tax_grouped[key]['amount'] += val['amount']
 
-                                else:        
+                                else:
                                     tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                
+
                                     val = {
                                         'invoice_id': self.id,
                                         'name': tax['name'],
@@ -253,7 +252,7 @@ class AccountInvoice(models.Model):
                     if records:
                         for loc in records:
                             if loc.get('journal_id') ==  order.journal_id.id:
-                                ql_tax_id = "Select tax_id from account_fiscal_position_base_tax slt where id = "+ str(loc.get('tax_id'))+"" 
+                                ql_tax_id = "Select tax_id from account_fiscal_position_base_tax slt where id = "+ str(loc.get('tax_id'))+""
                                 self.env.cr.execute( ql_tax_id )
                                 records_tax = self.env.cr.dictfetchall()
                                 fp_tax_ids = [tax.get('tax_id') for tax in records_tax]
@@ -270,7 +269,7 @@ class AccountInvoice(models.Model):
                                                         if tax_invoice.tax_group_id.id == tax_id.tax_group_id_header.id:
                                                             base += tax_grouped[ key_tax_grouped ].get('amount')
                                             tax = tax_id.compute_all(base, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                    
+
                                             val = {
                                                 'invoice_id': self.id,
                                                 'name': tax['name'],
@@ -289,9 +288,9 @@ class AccountInvoice(models.Model):
                                             else:
                                                 tax_grouped[key]['amount'] += val['amount']
 
-                                        else:        
+                                        else:
                                             tax = tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
-                                        
+
                                             val = {
                                                 'invoice_id': self.id,
                                                 'name': tax['name'],
@@ -311,7 +310,7 @@ class AccountInvoice(models.Model):
                                                 tax_grouped[key]['amount'] += val['amount']
             else:
                 raise UserError(_('Debe definir una posicion fiscal para el partner asociado a la compañía actual'))
-            
+
             if self.fiscal_position_id:
                 fp = self.env['account.fiscal.position'].search([('id','=',self.fiscal_position_id.id)])
                 fp.ensure_one()
@@ -363,8 +362,8 @@ class AccountInvoice(models.Model):
                             if key not in tax_grouped:
                                 tax_grouped[key] = val
                             else:
-                                tax_grouped[key]['amount'] += val['amount']                
-                        else:                    
+                                tax_grouped[key]['amount'] += val['amount']
+                        else:
                             tax = base.tax_id.compute_all(self.amount_untaxed, self.currency_id, partner=self.partner_id)['taxes'][0]
                             val = {
                                 'invoice_id': self.id,
@@ -440,9 +439,11 @@ class AccountInvoice(models.Model):
             inv.resolution_number_to = sequence['number_to']
         return result
 
+
 class AccountInvoiceLine(models.Model):
     _name = 'account.invoice.line'
     _inherit = 'account.invoice.line'
+
 
 class AccountTax(models.Model):
     _name = 'account.tax'
@@ -455,7 +456,7 @@ class AccountTax(models.Model):
 
     #Grupo de impuestos de encabezado
     tax_group_id_header = fields.Many2one('account.tax.group', string="Tax Group")
-    
+
     dont_impact_balance = fields.Boolean(string="Don't impact balance", default=False,
         help="Check this if you want to assign counterpart taxes accounts")
     account_id_counterpart = fields.Many2one('account.account', string='Tax Account Counterpart', ondelete='restrict',
@@ -490,7 +491,7 @@ class AccountBaseTax(models.Model):
     amount = fields.Float(digits=0, default=0, string="Tax amount", required=True)
     # currency_id = fields.Many2one('res.currency', related='tax_id.company_id.currency_id', store=True)
 
-    @api.one
+    @api.multi
     @api.constrains('start_date', 'end_date')
     def _check_closing_date(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:
@@ -514,6 +515,7 @@ class AccountTaxGroup(models.Model):
 
     not_in_invoice = fields.Boolean(string="Don't show in invoice", default=False,
         help="Check this if you want to hide the taxes in this group when print an invoice")
+
 
 class AccountFiscalPositionTaxes(models.Model):
     _name = 'account.fiscal.position.base.tax'
@@ -541,7 +543,7 @@ class AccountFiscalPosition(models.Model):
 
     tax_ids_invoice = fields.One2many('account.fiscal.position.base.tax', 'position_id',
         string='Taxes that refer to the fiscal position')
-    
+
 
 class AccountJournal(models.Model):
     _name = "account.journal"
@@ -549,10 +551,11 @@ class AccountJournal(models.Model):
 
     @api.model
     def create(self, vals):
-        
+
         return super(AccountJournal, self).create(vals)
 
     @api.model
     def _create_sequence(self, vals, refund=False):
-        
+
         return super(AccountJournal, self)._create_sequence(vals, refund)
+

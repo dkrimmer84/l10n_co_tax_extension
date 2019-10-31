@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 {
     'name': 'Colombia - Impuestos',
     'category': 'Localization',
-    'version': '0.1',
+    'version': '12.0.0.0.1',
     'author': 'Luis Alfredo da Silva, Dominic Krimmer, Plastinorte S.A.S',
     'license': 'AGPL-3',
     'maintainer': 'dominic.krimmer@gmail.com',
@@ -24,7 +23,7 @@ Colombia Impuestos:
     'data': [
         'security/ir.model.access.csv',
         'views/l10n_co_tax_extension.xml',
-        'views/report_invoice.xml',
+        #'views/report_invoice.xml',
         'views/ir_sequence_view.xml'
     ],
     'installable': True,
