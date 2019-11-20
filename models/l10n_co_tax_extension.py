@@ -43,7 +43,7 @@ class AccountInvoice(models.Model):
             remaining_numbers = self.journal_id.sequence_id.remaining_numbers
             remaining_days = self.journal_id.sequence_id.remaining_days
             dian_resolution = self.env['ir.sequence.dian_resolution'].search([('sequence_id','=',self.journal_id.sequence_id.id),('active_resolution','=',True)])
-            today = datetime.strptime(fields.Date.context_today(self), '%Y-%m-%d')
+            today = fields.Datetime.now()
 
             not_valid = False
             spent = False
