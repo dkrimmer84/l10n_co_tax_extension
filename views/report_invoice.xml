@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <data>
+    <template id="external_layout_document_inherit" inherit_id="web.external_layout_standard">
+         <xpath expr="//div[@name='company_address']" position="replace">
+           <div class="col-6" name="company_address">
+                    <div t-field="company.partner_id"
+                        t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": true}'
+                    />
+           </div>
+
+           <div class="col-6" name="client_address">
+              <span><strong>Cliente: </strong></span> <span t-field="o.partner_id.name"/><br/>
+                <span t-if="o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.formatedNit"/></span>
+                <span t-if="o.partner_id.xidentification and not o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.xidentification"/></span>
+              <address t-field="o.partner_id"
+                        t-field-options='{"widget": "contact", "fields": ["address"], "no_marker": true}' />
+              <span t-if="o.partner_id.vat">TIN: <span t-field="o.partner_id.vat"/></span>
+          </div>
+         </xpath>
+    </template> 
 
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
 
@@ -9,7 +27,7 @@
       </xpath>
 
       <xpath expr="//t[@t-set='address']" position="replace">
-          <div class="col-xs-5" style="margin-left:400px; height:130px;">
+          <div class="col-xs-5 col-xs-offset-7" style="margin-top: -100px;margin-left:600px; height:130px;">          
               <span><strong>Cliente: </strong></span> <span t-field="o.partner_id.name"/><br/>
                 <span t-if="o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.formatedNit"/></span>
                 <span t-if="o.partner_id.xidentification and not o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.xidentification"/></span>
@@ -30,67 +48,64 @@
       </xpath>
       
 
-      <xpath expr="//div[@id='informations']" position="replace">
-        <div id="informations" class="row mt32 mb32">
-            <t t-if="o.journal_id.sequence_id.use_dian_control">
-                <div style="font-size:11px;" >
+
+       <xpath expr="//div[@id='informations']" position="replace">
+           <t t-if="o.journal_id.sequence_id.use_dian_control">
+                <div >
                        Autorización DIAN número:
-                       <span t-field="o.resolution_number" /> 
+                       <span t-field="o.resolution_number" />
                        Fecha de Autorización: <span t-field="o.resolution_date" />
                        <t t-if="o.resolution_date_to"> | Vigencia de Autorización: <span t-field="o.resolution_date_to" /> |</t>
                        Rango de Facturación: <span t-field="o.resolution_number_from" /> - <span t-field="o.resolution_number_to" />
                 </div>
             </t>
-            <div style="font-size:11px;">
-                <table >
-                  <tr>
-                    <td width="20%" t-if="o.name" name="description">
+
+            <div id="informations" class="row mt32 mb32">
+                <div class="col-auto mw-100 mb-2" t-if="o.name" name="description">
                       <strong>Observación:</strong>
-                      <p t-field="o.name"/>
-                    </td>
-                    <td width="15%" t-if="o.date_invoice" name="invoice_date">
-                      <strong>Fecha de Facturación:</strong>
-                      <p t-field="o.date_invoice"/>
-                    </td>
-                    <td width="15%" t-if="o.date_due and o.type == 'out_invoice' and o.state in ('open', 'in_payment', 'paid')" name="due_date">
-                      <strong>Fecha de Vencimiento:</strong>
-                       <p t-field="o.date_due"/>
-                    </td>
-                    <td width="20%" t-if="o.origin" name="origin" >
+                      <p class="m-0" t-field="o.name"/>
+                 </div>
+        
+                 <div class="col-auto mw-100 mb-2" t-if="o.date_invoice" name="invoice_date">
+                       <strong>Fecha de facturación:</strong>
+                       <p class="m-0" t-field="o.date_invoice"/>
+                  </div>
+                 <div class="col-auto mw-100 mb-2" t-if="o.date_due and o.type == 'out_invoice' and o.state in ('open', 'in_payment', 'paid')" name="due_date">
+                       <strong>Fecha de Vencimiento:</strong>
+                       <p class="m-0" t-field="o.date_due"/>
+                 </div>
+                 <div class="col-auto mw-100 mb-2" t-if="o.origin" name="origin">
                         <strong>Fuente:</strong>
-                      <p t-field="o.origin"/>
-                    </td>
-                    <td width="10%" t-if="o.partner_id.ref" name="customer_code">
-                        <strong>Codigo Cliente:</strong>
-                        <p t-field="o.partner_id.ref"/>
-                    </td>
-                    <td width="10%" t-if="o.reference" name="reference">
+                        <p class="m-0" t-field="o.origin"/>
+                  </div>
+                  <div class="col-auto mw-100 mb-2" t-if="o.partner_id.ref" name="customer_code">
+                        <strong>Código Cliente:</strong>
+                        <p class="m-0" t-field="o.partner_id.ref"/>
+                  </div>
+                  <div name="reference" class="col-auto mw-100 mb-2" t-if="o.reference">
                         <strong>Referencia:</strong>
-                        <p t-field="o.reference"/>
-                    </td>
-                  </tr>
-                </table>
-              </div>
+                        <p class="m-0" t-field="o.reference"/>
+                   </div>
         </div>
     </xpath>
 
     <xpath expr="//table[@name='invoice_line_table']" position="replace">
 
-    <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;"> 
+    <div style="font-size: 16px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;"> 
 
-                      <div style="width:62%; display:block; float:left;margin:0;padding:0;">
+                      <div style="width:45%; display:block; float:left;margin:0;padding:0;">
                             <span>Descripción</span>
                       </div>
-                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right" style="width: 12%; display:block; float:left;margin:0;padding:0;">
                            <span>Cantidad</span>
                       </div>
-                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right"  style="width: 16%; display:block; float:left; margin:0;padding:0;">
                           <span>Precio Unitario</span>
                       </div>
                         <div t-if="display_discount" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
                         <span>Descuento (%)</span>
                       </div>
-                      <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right" style="width: 17%; display:block; float:left;margin:0;padding:0;">
                         <span>Impuestos</span>
                       </div>
                       <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
@@ -103,11 +118,11 @@
     <t t-set="j" t-value="1"/>
 
     <div t-foreach="o.invoice_line_ids" t-as="l" 
-         style="font-size:11px;">
+         style="font-size: 16px;">
 
 
        <div t-if="(i-1) % 13 == 0 and i != 1" style="page-break-after: always;">
-                                <strong style="font-size: 15px; float:left; display:block; margin-top:20px;">Página <span t-esc="j"/>
+                                <strong style="font-size: 16px; float:left; display:block; margin-top:20px;">Página <span t-esc="j"/>
                                 <t t-set="j" t-value="j+1"/>
                                 <span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
                                 <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">de PRO-FORMA</span>
@@ -119,18 +134,18 @@
                                 <span t-field="o.number"/></strong><br />
 
                         <div style="display:block; float:left; border:0; height:100px; width:100%; margin:auto;padding:70px 0 0 0;">
-                                <div id="pn-right" style="float:left; width:195px;margin-right:20px; font-size:13px;">
+                                <div id="pn-right" style="float:left; width:195px;margin-right:20px; font-size: 16px;">
                                   <p><strong>Recibido y aceptado por:</strong></p>
                                 </div>
 
                                 <div id="pn-right" style="float:left; width:195px;margin-right:20px;">
-                                        <p style="font-size: 13px;">______________________<br />Firma / Sello</p>
+                                        <p style="font-size: 16px;">___________________<br />Firma / Sello</p>
                                 </div>
                                 <div id="pn-right" style="float:left; width:195px;">
-                                        <p style="font-size: 13px;">______________________<br />NIT o C.C.</p>
+                                        <p style="font-size: 16px;">___________________<br />NIT o C.C.</p>
                                 </div>
                                 <div id="pn-right" style="float:left; width:195px;">
-                                        <p style="font-size: 13px;">______________________<br />Fecha</p>
+                                        <p style="font-size: 16px;">___________________<br />Fecha</p>
                                 </div>
                         </div>
                    </div>
@@ -138,7 +153,7 @@
 
 
        <div t-if="(i-1) % 13 == 0 and j > 1" style="float:left; display:block; padding-top: 135px; width: 100%;">
-          <div style="font-size: 11px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
+          <div style="font-size: 16px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
       <div t-if="j > 1" style="padding-bottom:15px;">
                     <h2><span>Página</span> <span t-esc="j"/> 
         <span t-if="o.type == 'out_invoice'">de Factura de Venta</span>
@@ -150,63 +165,59 @@
                                 <span t-if="o.type == 'in_invoice'">de Factura de Compra</span>
          <span t-field="o.number"/></h2>
                 </div>
-                        <div style="width:62%; display:block; float:left;margin:0;padding:0;">
+                      <div style="width:45%; display:block; float:left;margin:0;padding:0;">
                             <span>Descripción</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                           <span>Cantidad</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                          <span>Precio Unitario</span>
-                        </div>
-                        <div t-if="display_discount" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
-                          <span>Descuento (%)</span>
-                        </div>
-                        <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
-                          <span>Impuestos</span>
-                        </div>
-                        <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                          <span>Precio</span>
-                        </div>
                       </div>
-
-       </div>
+                      <div class="text-right" style="width: 12%; display:block; float:left;margin:0;padding:0;">
+                           <span>Cantidad</span>
+                      </div>
+                      <div class="text-right" style="width: 16%; display:block; float:left;margin:0;padding:0;">
+                          <span>Precio Unitario</span>
+                      </div>
+                        <div t-if="display_discount" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
+                        <span>Descuento (%)</span>
+                      </div>
+                      <div class="text-right" style="width: 17%; display:block;float:left;margin:0;padding:0;">
+                        <span>Impuestos</span>
+                      </div>
+                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                          <span>Precio</span>
+                      </div>
+                 </div>
+          </div>
        
-
 
        <div style="padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid #DADADA; display:block; float:left;">
 
-                      <div style="width:62%; display:block; float:left;margin:0;padding:0;">
+                      <div style="width:45%; display:block; float:left;margin:0;padding:0;">
                             <span t-field="l.name"/>
                       </div>
-                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right" style="width: 12%; display:block; float:left;margin:0;padding:0;">
                            <span t-field="l.quantity"/> <span t-field="l.uom_id"  groups="product.group_uom"/>
                       </div>
-                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right" style="width: 16%; display:block; float:left;margin:0;padding:0;">
                           <span t-field="l.price_unit"/>
                       </div>
                         <div t-if="display_discount" groups="sale.group_discount_per_so_line" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
                         <span t-field="l.discount"/>
                       </div>
-                      <div class="text-right" style="width: 8%; display:block; float:left;margin:0;padding:0;">
+                      <div class="text-right" style="width: 17%; display:block; float:left;margin:0;padding:0;">
                         <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
                       </div>
                       <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
                         <span t-field="l.price_subtotal" 
                                 t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
                       </div>
-                   </div>
+          </div>
 
 
-  
-    <t t-set="i" t-value="i+1"/>
-    </div>
-      </xpath>
-
+     
+           <t t-set="i" t-value="i+1"/>
+       </div>
+   </xpath>
       <xpath expr="//div[@class='clearfix']" position="replace">
-        <div>
-          <div id="total" class="row">
-            <div style="font-size:11px; margin-top:15px;">
+          <div id="total" style="padding: 5px 0 5px 0;">
+          <div style="font-size:16px; margin-top:15px;">
                 <table  width="100%" class="table table-condensed">
                     <tr>
                       <td width="60%">
@@ -214,12 +225,12 @@
                         <div class="row" t-if="o.tax_line_ids and o.at_least_one_tax_group_enabled()">
                 
                            <div>
-                              <table class="table table-condensed" style="font-size:11px;">
+                              <table class="table table-condensed" style="font-size:16px;">
                                   <thead>
                                       <tr>
-                                          <th width="20%" align="center">Tax</th>
+                                          <th width="60%" align="center">Impuesto</th>
                                           <th width="20%" align="center">Base</th>
-                                          <th width="20%" align="center">Amount</th>
+                                          <th width="20%" align="center">Cantidad</th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -239,19 +250,19 @@
                                       </tr>
                                   </tbody>
                               </table>
-                          </div>
-                        </div>
+                         </div>
+                      </div>
 
                           
                       </td>
                       <td width="5%"></td>
 
-                      <td width="35%" align="left">
+                      <td width="35%" align="right">
 
                         <table>
                             <tr class="border-black">
-                                 <td width="50%" ><strong>Subtotal</strong></td>
-                                 <td width="50%" class="text-right">
+                                 <td><strong>Subtotal</strong></td>
+                                 <td class="text-right">
                                     <span t-field="o.amount_untaxed" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
                                 </td>
                             </tr>
@@ -264,9 +275,9 @@
                                </tr>
                               </t>
                               <tr class="border-black">
-                                   <td><strong style="font-size:11px;">Total</strong></td>
+                                   <td><strong style="font-size:20px;">Total</strong></td>
                                    <td class="text-right">
-                                       <span style="font-size:11px;" t-field="o.amount_total" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+                                       <span style="font-size:16px;" t-field="o.amount_total" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
                                    </td>
                               </tr>
                           </table>
@@ -274,32 +285,30 @@
                       </td>
                     </tr>
                   </table>               
-             </div>
            </div>
         </div>
   </xpath>
 
-
-        <xpath expr="//p[@name='comment']" position="after">
+        <xpath expr="//p[@name='note']" position="after">
                 <div style="border:0; height:100px; width:100%; margin:auto;padding:20px 0 0 0;">
-                <div id="pn-right" style="float:left; width:195px;margin-right:11px;font-size:11px;">
+                <div id="pn-right" style="float:left; width:195px;margin-right:11px;font-size: 16px;">
                         <p><strong>Recibido y aceptado por:</strong></p>
                 </div>
 
-                <div id="pn-right" style="float:left; width:195px;margin-right:11px;font-size:11px;">
-                        <p>______________________<br />Firma / Sello</p>
+                <div id="pn-right" style="float:left; width:195px;margin-right:11px;font-size: 16px;">
+                        <p>_________________<br />Firma / Sello</p>
                 </div>
-                <div id="pn-right" style="float:left; width:195px;font-size:11px;">
-                        <p>______________________<br />NIT o C.C.</p>
+                <div id="pn-right" style="float:left; width:195px;font-size: 16px;">
+                        <p>__________________<br />NIT o C.C.</p>
                 </div>
-                <div id="pn-right" style="float:left; width:195px;font-size:11px;">
-                        <p>______________________<br />Fecha</p>
+                <div id="pn-right" style="float:left; width:195px;font-size: 16px;">
+                        <p>__________________<br />Fecha</p>
                 </div>
                  </div>
         </xpath>
 
 <xpath expr="//p[@t-if='o.reference']" position="replace">
-    <p t-if="o.reference" style="font-size:11px;">
+    <p t-if="o.reference" style="font-size: 16px;">
         Por favor utilice la siguiente referencia para su pago : <span t-field="o.reference"/>
     </p>
 </xpath>
@@ -307,11 +316,11 @@
   <xpath expr="//p[@name='comment']" position="replace">
       <p t-if="o.comment or o.team_id">
          <span t-if="o.comment">
-            <strong style="font-size:11px;">Información adicional:</strong>
-             <span style="font-size:11px;" t-field="o.comment"/>
+            <strong style="font-size: 16px;">Información adicional:</strong>
+             <span style="font-size: 16px;" t-field="o.comment"/>
          </span>
          <span t-if="o.team_id">
-          <span style="font-size:11px; font-weight:bold;">Equipo de Ventas:</span> <span style="font-size:11px;" t-field="o.team_id"/>
+          <span style="font-size: 16px; font-weight:bold;">Equipo de Ventas:</span> <span style="font-size: 16px;" t-field="o.team_id"/>
          </span>
      </p>
 
