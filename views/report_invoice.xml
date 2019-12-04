@@ -25,18 +25,6 @@
       <xpath expr="//div/h2/span[1]" position="replace">
         <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
       </xpath>
-
-      <xpath expr="//t[@t-set='address']" position="replace">
-          <div class="col-xs-5 col-xs-offset-7" style="margin-top: -100px;margin-left:600px; height:130px;">          
-              <span><strong>Cliente: </strong></span> <span t-field="o.partner_id.name"/><br/>
-                <span t-if="o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.formatedNit"/></span>
-                <span t-if="o.partner_id.xidentification and not o.partner_id.formatedNit"> NIT: <span t-field="o.partner_id.xidentification"/></span>
-              <address t-field="o.partner_id"
-                        t-field-options='{"widget": "contact", "fields": ["address"], "no_marker": true}' />
-              <span t-if="o.partner_id.vat">TIN: <span t-field="o.partner_id.vat"/></span>
-          </div>
-      </xpath>
-
       <xpath expr="//div/h2/span[4]" position="replace">
         <span t-if="o.type == 'out_refund'">Refund</span>
       </xpath>
