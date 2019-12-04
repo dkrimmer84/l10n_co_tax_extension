@@ -22,6 +22,8 @@
 
     <template id="report_invoice_document_inherit" inherit_id="account.report_invoice_document">
 
+      <xpath expr="//t[@t-set='address']" position="replace">
+      </xpath>
       <xpath expr="//div/h2/span[1]" position="replace">
         <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
       </xpath>
@@ -35,7 +37,6 @@
         <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
       </xpath>
       
-
 
        <xpath expr="//div[@id='informations']" position="replace">
            <t t-if="o.journal_id.sequence_id.use_dian_control">
@@ -138,8 +139,6 @@
                         </div>
                    </div>
 
-
-
        <div t-if="(i-1) % 13 == 0 and j > 1" style="float:left; display:block; padding-top: 135px; width: 100%;">
           <div style="font-size: 16px; font-weight:bold; padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid black; display:block; float:left;">
       <div t-if="j > 1" style="padding-bottom:15px;">
@@ -176,27 +175,26 @@
        
 
        <div style="padding: 5px 0 5px 0; width: 100%; border-bottom:1px solid #DADADA; display:block; float:left;">
-
-                      <div style="width:45%; display:block; float:left;margin:0;padding:0;">
-                            <span t-field="l.name"/>
-                      </div>
-                      <div class="text-right" style="width: 12%; display:block; float:left;margin:0;padding:0;">
-                           <span t-field="l.quantity"/> <span t-field="l.uom_id"  groups="product.group_uom"/>
-                      </div>
-                      <div class="text-right" style="width: 16%; display:block; float:left;margin:0;padding:0;">
-                          <span t-field="l.price_unit"/>
-                      </div>
-                        <div t-if="display_discount" groups="sale.group_discount_per_so_line" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
-                        <span t-field="l.discount"/>
-                      </div>
-                      <div class="text-right" style="width: 17%; display:block; float:left;margin:0;padding:0;">
-                        <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
-                      </div>
-                      <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
-                        <span t-field="l.price_subtotal" 
+           <div style="width:45%; display:block; float:left;margin:0;padding:0;">
+                 <span t-field="l.name"/>
+           </div>
+            <div class="text-right" style="width: 12%; display:block; float:left;margin:0;padding:0;">
+                 <span t-field="l.quantity"/> <span t-field="l.uom_id"  groups="product.group_uom"/>
+            </div>
+                <div class="text-right" style="width: 16%; display:block; float:left;margin:0;padding:0;">
+                    <span t-field="l.price_unit"/>
+                </div>
+                 <div t-if="display_discount" groups="sale.group_discount_per_so_line" class="text-right" style="width: 5%; display:block; float:left;margin:0;padding:0;">
+                    <span t-field="l.discount"/>
+                 </div>
+                  <div class="text-right" style="width: 17%; display:block; float:left;margin:0;padding:0;">
+                    <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
+                  </div>
+                  <div class="text-right" style="width: 10%; display:block; float:left;margin:0;padding:0;">
+                  <span t-field="l.price_subtotal" 
                                 t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
-                      </div>
-          </div>
+             </div>
+       </div>
 
 
      
